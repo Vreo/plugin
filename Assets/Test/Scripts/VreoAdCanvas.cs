@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using System.Collections;
 using UnityEngine.Video;
@@ -17,7 +18,7 @@ namespace VREO
             Succeeded = 1,
             Failed = 2,
             Showing = 3,
-        };
+        }
         public enum MediaType
         {
             Unknown = 0,
@@ -26,7 +27,17 @@ namespace VREO
             Banner = 3,
             LogoSquare = 4,
             LogoWide = 5,
-        };
+        }
+
+        public enum ResolutionType
+        {
+	        MediumRectangle = 1,
+	        LargeRectangle = 2,
+	        WideSkyscraper = 3,
+	        Leaderboard = 4,
+	        LandscapeVideo = 5,
+	        PortraitVideo = 6
+        }
 
 		// ==============================================================================
 
@@ -87,6 +98,38 @@ namespace VREO
 
         public VideoPlayer VideoPlayer { get; private set; }
         public VreoMovieQuad MovieQuad { get; private set; }
+
+        public static Vector2Int SizeForResolutionType(ResolutionType type)
+        {
+	        Vector2Int result;
+	        switch (type)
+	        {
+		        case ResolutionType.MediumRectangle:
+			        result = new Vector2Int(300, 250);
+			        break;
+		        case ResolutionType.LargeRectangle:
+			        result = new Vector2Int(300, 600);
+			        break;
+		        case ResolutionType.WideSkyscraper:
+			        result = new Vector2Int(160, 600);
+			        break;
+		        case ResolutionType.Leaderboard:
+			        result = new Vector2Int(728, 90);
+			        break;
+		        case ResolutionType.LandscapeVideo:
+			        result = new Vector2Int(540, 300);
+			        break;
+		        case ResolutionType.PortraitVideo:
+			        result = new Vector2Int(300, 540);
+			        break;
+		        default:
+			        result = Vector2Int.zero;
+			        Debug.LogError("Resolution type is invalid. Returning 0x0");
+			        break;
+	        }
+
+	        return result;
+        }
 
         // ==============================================================================
 
