@@ -73,9 +73,9 @@ namespace VREO
         // ==============================================================================
         // GetViewingData
         // ==============================================================================
-        public ClassViewDataRequest GetViewingData()
+        public ViewDataRequest GetViewingData()
         {
-            ClassViewDataRequest viewStat = new ClassViewDataRequest();
+            ViewDataRequest viewStat = new ViewDataRequest();
 
             //viewStat.str_DevAccessToken = this.adCanvas.CurrentAdResponse.body.result.developer_transaction_token;
             //viewStat.developer_game_slot_id = this.adCanvas.developer_game_slot_id;
@@ -84,7 +84,7 @@ namespace VREO
             //viewStat.advertiser_ad_is_visual = true;
             //viewStat.advertiser_ad_is_aural = (this.adCanvas.mediaType == VreoAdCanvas.MediaType.MOVIE);
 
-            viewStat.ID_Advertisement = adCanvas.CurrentAdResponse.result.ID_Advertisement.ToString();
+            viewStat.ID_Advertisement = adCanvas.CurrentVreoResponse.result.ID_Advertisement;
 
             viewStat.dec_TotalHitTime = total_hit_time;
             viewStat.dec_TotalScreenPercentage = avg_screenPercent;
@@ -334,7 +334,7 @@ namespace VREO
 		// ==============================================================================
 		// CalculateBufferAreaSiz
 		// ==============================================================================
-		private float CalculateBufferAreaSize(Vector3[] buffer, int count)
+		float CalculateBufferAreaSize(Vector3[] buffer, int count)
 		{
 			// now we triangulate the clipped polygon to calculate it's total area
 			float totalArea = 0.0f;
@@ -356,9 +356,9 @@ namespace VREO
         // ==============================================================================
         private float CalculateAdVolume()
         {
-            if (this.adCanvas.mediaType == VreoAdCanvas.MediaType.MOVIE)
+            if (adCanvas.mediaType == VreoAdCanvas.MediaType.Movie)
             {
-                AudioSource audioSource = this.adCanvas.VideoPlayer.GetTargetAudioSource(0);
+                var audioSource = adCanvas.VideoPlayer.GetTargetAudioSource(0);
 
                 float adVolume = 0;
                 float listenerDistance = Vector3.Distance(audioSource.transform.position, this.targetListener.transform.position);
@@ -386,7 +386,7 @@ namespace VREO
             return 0;
         }
 
-        private float logerp(float a, float b, float t)
+        float logerp(float a, float b, float t)
         {
             return a * Mathf.Pow(b / a, t);
         }

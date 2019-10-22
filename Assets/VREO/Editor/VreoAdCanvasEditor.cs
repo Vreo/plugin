@@ -37,14 +37,14 @@ namespace VREO
 
             switch ((VreoAdCanvas.MediaType)mediaType.enumValueIndex)
             {
-                case VreoAdCanvas.MediaType.IMAGE:
-                case VreoAdCanvas.MediaType.BANNER:
-                case VreoAdCanvas.MediaType.LOGO_SQUARE:
-                case VreoAdCanvas.MediaType.LOGO_WIDE:
+                case VreoAdCanvas.MediaType.Image:
+                case VreoAdCanvas.MediaType.Banner:
+                case VreoAdCanvas.MediaType.LogoSquare:
+                case VreoAdCanvas.MediaType.LogoWide:
                     EditorGUILayout.PropertyField(imageDuration);
                     break;
 
-                case VreoAdCanvas.MediaType.MOVIE:
+                case VreoAdCanvas.MediaType.Movie:
                     EditorGUILayout.PropertyField(initialRandomDelay);
                     break;
 

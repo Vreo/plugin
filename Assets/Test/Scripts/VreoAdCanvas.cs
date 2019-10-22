@@ -13,7 +13,7 @@ namespace VREO
 	[RequireComponent(typeof(VideoPlayer))]
 	public class VreoAdCanvas : MonoBehaviour
 	{
-        private const float SEND_VIEW_DATA_TIME = 600.0f;
+        const float SendViewDataTime = 600.0f;
 
 		public enum MediaLoadingState
         {
@@ -26,18 +26,18 @@ namespace VREO
         };
         public enum MediaType
         {
-            UNKNOWN = 0,
-			MOVIE = 1,
-            IMAGE = 2,
-            BANNER = 3,
-            LOGO_SQUARE = 4,
-            LOGO_WIDE = 5,
+            Unknown = 0,
+			Movie = 1,
+            Image = 2,
+            Banner = 3,
+            LogoSquare = 4,
+            LogoWide = 5,
         };
 
 		// ==============================================================================
 
-		public MediaType mediaType = MediaType.MOVIE;
-        public string developer_game_slot_id = "0";
+		public MediaType mediaType = MediaType.Movie;
+        public string developerGameSlotId = "0";
 
         public bool playOnAwake = true;
 		public bool autoPlayNew = true;
@@ -57,11 +57,11 @@ namespace VREO
 		private VideoPlayer videoPlayer;
 		private Renderer renderer;
 
-		private ClassRandomAdResponse currentAdResponse;
+		private VreoResponse _currentVreoResponse;
 
 		private VreoMovieQuad movieQuad;
 
-        private float sendViewDataTimer = SEND_VIEW_DATA_TIME;
+        private float sendViewDataTimer = SendViewDataTime;
 
         // ==============================================================================
 
@@ -77,13 +77,13 @@ namespace VREO
             {
                 switch (mediaType)
                 {
-                    case MediaType.IMAGE:
-                    case MediaType.BANNER:
-                    case MediaType.LOGO_SQUARE:
-                    case MediaType.LOGO_WIDE:
+                    case MediaType.Image:
+                    case MediaType.Banner:
+                    case MediaType.LogoSquare:
+                    case MediaType.LogoWide:
                         return imageDuration;
 
-                    case MediaType.MOVIE:
+                    case MediaType.Movie:
                         return (videoPlayer != null && videoPlayer.clip != null) ? (float)videoPlayer.clip.length : 0;
 
                     default:
@@ -93,7 +93,7 @@ namespace VREO
         }
 
 
-        public ClassRandomAdResponse CurrentAdResponse { get { return currentAdResponse; } }
+        public VreoResponse CurrentVreoResponse { get { return _currentVreoResponse; } }
         public VideoPlayer VideoPlayer { get { return videoPlayer; } }
 		public VreoMovieQuad MovieQuad { get { return movieQuad; } }
 
@@ -101,7 +101,7 @@ namespace VREO
 
 		private void Awake()
 		{
-            if(!this._initialized)
+            if(!_initialized)
             {
                 sendViewDataTimer -= UnityEngine.Random.Range(1, 20);
                 initialRandomDelay = UnityEngine.Random.Range(0.0f, initialRandomDelay);
@@ -121,11 +121,11 @@ namespace VREO
                 if (renderer == null)
                     Debug.LogError("Missing Attached Renderer Component");
 
-                this._initialized = true;
+                _initialized = true;
             }
 		}
 
-        private void OnEnable()
+        void OnEnable()
         {
             if (playOnAwake)
                 ShowAd(true);
@@ -148,10 +148,10 @@ namespace VREO
 
 		// ==============================================================================
 
-		private void RandomAdCallback(ClassRandomAdResponse response)
+		void RandomAdCallback(VreoResponse response)
 		{
 			// update local response reference for external access
-			this.currentAdResponse = response;
+			_currentVreoResponse = response;
 
 			if (response.success)
 			{
@@ -169,7 +169,7 @@ namespace VREO
 
 		// ==============================================================================
 
-		private void VideoPlayer_PrepareCompleted(VideoPlayer source)
+		void VideoPlayer_PrepareCompleted(VideoPlayer source)
         {
 			if (source.isPrepared)
 			{
@@ -186,7 +186,7 @@ namespace VREO
 				loadingState = MediaLoadingState.Failed;
         }
 
-		private void VideoPlayer_LoopPointReached(VideoPlayer source)
+		void VideoPlayer_LoopPointReached(VideoPlayer source)
         {
 			if(!source.isLooping)
 			    source.Stop();
@@ -195,7 +195,7 @@ namespace VREO
 			    ShowAd(true);
         }
 
-		private void ShowVideo(string url)
+		void ShowVideo(string url)
 		{         
 			if (videoPlayer.isPlaying)
                 videoPlayer.Stop();
@@ -210,7 +210,7 @@ namespace VREO
 
 		// ==============================================================================
 
-		private void ShowImage(WWW wwwReader)
+		void ShowImage(WWW wwwReader)
 		{
 			loadingState = MediaLoadingState.Succeeded;
             
@@ -230,7 +230,7 @@ namespace VREO
             }
 		}
 
-        private void ShowSVGImage(WWW wwwReader)
+        void ShowSVGImage(WWW wwwReader)
         {
             /*
             loadingState = MediaLoadingState.Succeeded;
@@ -250,7 +250,7 @@ namespace VREO
             */
         }
 
-        private Sprite BuildSVGSprite(string svg)
+        Sprite BuildSVGSprite(string svg)
         {
             /*
             var tessOptions = new VectorUtils.TessellationOptions()
@@ -276,17 +276,17 @@ namespace VREO
 
 		// ==============================================================================
 
-		private IEnumerator DownloadAdMediaAndLoad(ClassRandomAdResponse response)
+		IEnumerator DownloadAdMediaAndLoad(VreoResponse response)
         {
 			int mediaType = response.result.ID_MediaType;
             string mediaFormat = response.result.str_MediaTypeName;
 
 			switch ((MediaType)mediaType)
             {
-				case MediaType.IMAGE:
-                case MediaType.BANNER:
-                case MediaType.LOGO_SQUARE:
-                case MediaType.LOGO_WIDE:
+				case MediaType.Image:
+                case MediaType.Banner:
+                case MediaType.LogoSquare:
+                case MediaType.LogoWide:
 					{
 						WWW wwwReader = new WWW(response.result.str_MediaURL);                  
                         yield return wwwReader;
@@ -311,7 +311,7 @@ namespace VREO
 					}
 					break;
 
-                case MediaType.MOVIE:
+                case MediaType.Movie:
                     {
 						ShowVideo(response.result.str_MediaURL);
                     }
@@ -319,27 +319,27 @@ namespace VREO
             }
         }
 
-		private IEnumerator RetrieveStreamingAsset(ClassRandomAdResponse response)
+		IEnumerator RetrieveStreamingAsset(VreoResponse response)
         {
-            string mediaURL = "";
+            string mediaUrl;
 
             if (response.success)
-                mediaURL = response.result.str_MediaURL;
+                mediaUrl = response.result.str_MediaURL;
             else
             {
                 switch ((MediaType)response.result.ID_MediaType)
                 {
-                    case MediaType.MOVIE:
-                        mediaURL = "vreo_placeholder_video.mp4";
+                    case MediaType.Movie:
+                        mediaUrl = "vreo_placeholder_video.mp4";
                         break;
                     default:
-                        mediaURL = "vreo_placeholder_image.jpg";
+                        mediaUrl = "vreo_placeholder_image.jpg";
                         break;
                     }
             }
 
             //string streamingMediaPath = "file:///" + mediaFileName;
-            string streamingMediaPath = "file://" + Application.streamingAssetsPath + "/" + mediaURL;
+            string streamingMediaPath = "file://" + Application.streamingAssetsPath + "/" + mediaUrl;
 
             WWW wwwReader = new WWW(streamingMediaPath);
             yield return wwwReader;
@@ -355,14 +355,14 @@ namespace VREO
 
 				switch ((MediaType)media_type)
 				{
-                    case MediaType.IMAGE:
-                    case MediaType.BANNER:
-                    case MediaType.LOGO_SQUARE:
-                    case MediaType.LOGO_WIDE:
+                    case MediaType.Image:
+                    case MediaType.Banner:
+                    case MediaType.LogoSquare:
+                    case MediaType.LogoWide:
                         ShowImage(wwwReader);
 						break;
 
-					case MediaType.MOVIE:
+					case MediaType.Movie:
 							ShowVideo(wwwReader.url);
 						break;
 				}
@@ -371,7 +371,7 @@ namespace VREO
 
 		// ==============================================================================
 
-		private void Update()
+		void Update()
 		{
 			movieQuad.Update();
 
@@ -379,20 +379,20 @@ namespace VREO
             sendViewDataTimer -= Time.deltaTime;
             if (sendViewDataTimer <= 0.0f)
             {
-                sendViewDataTimer = SEND_VIEW_DATA_TIME;
+                sendViewDataTimer = SendViewDataTime;
 
-                ClassViewDataRequest viewStat = this.MovieQuad.GetViewingData();
+                ViewDataRequest viewStat = MovieQuad.GetViewingData();
                 VreoCommunicate.__SendViewData(viewStat);
             }
 
 
             if (loadingState == MediaLoadingState.Showing)
 			{
-				int media_type = CurrentAdResponse.result.ID_MediaType;
+				int media_type = CurrentVreoResponse.result.ID_MediaType;
 
 				switch ((MediaType)media_type)
 				{
-					case MediaType.MOVIE:
+					case MediaType.Movie:
 						{
 							if (videoPlayer != null)
 							{
@@ -402,10 +402,10 @@ namespace VREO
 							}
 						}
 						break;
-                    case MediaType.IMAGE:
-                    case MediaType.BANNER:
-                    case MediaType.LOGO_SQUARE:
-                    case MediaType.LOGO_WIDE:
+                    case MediaType.Image:
+                    case MediaType.Banner:
+                    case MediaType.LogoSquare:
+                    case MediaType.LogoWide:
                         {
 							playingTime += Time.deltaTime;
 
@@ -415,7 +415,7 @@ namespace VREO
 						break;
 				}
 			}
-			else if (loadingState == MediaLoadingState.Succeeded && mediaType == MediaType.MOVIE)
+			else if (loadingState == MediaLoadingState.Succeeded && mediaType == MediaType.Movie)
 			{
 				if (initialRandomDelay > 0)
 				{
@@ -427,7 +427,7 @@ namespace VREO
 		}
 
 		// Pauses video playback when the app loses or gains focus
-		private void OnApplicationPause(bool wasPaused)
+		void OnApplicationPause(bool wasPaused)
 		{
 			Debug.Log("OnApplicationPause: " + wasPaused);
 			if (videoPlayer != null)
