@@ -1,12 +1,6 @@
 using UnityEngine;
-using System.Collections;                   // required for Coroutines
-using System.Runtime.InteropServices;       // required for DllImport
-using System;                               // requred for IntPtr
-using System.IO;                            // required for File
-using System.Reflection;                    // required for using potentially non-existant Vector functions
-
-using UnityEngine.Video;                    // required for VideoPlayer
-//using Unity.VectorGraphics;
+using System.Collections;
+using UnityEngine.Video;
 
 namespace VREO
 {
@@ -43,35 +37,31 @@ namespace VREO
 		public bool autoPlayNew = true;
 
 		[Tooltip("Aids performance when trying to load several video ads at the same time")]
-		public float initialRandomDelay = 0.0f;
+		public float initialRandomDelay;
 		public float imageDuration = 10.0f;
 
         // ==============================================================================
 
-        private bool _initialized = false;
+        bool _initialized;
 
-		private MediaLoadingState loadingState = MediaLoadingState.Waiting;
-		private float playingTime = 0.0f;
-		private bool videoPaused = false;
+		MediaLoadingState _loadingState = MediaLoadingState.Waiting;
+		float _playingTime;
+		bool _videoPaused;
 
-		private VideoPlayer videoPlayer;
-		private Renderer renderer;
+		Renderer _renderer;
 
-		private VreoResponse _currentVreoResponse;
-
-		private VreoMovieQuad movieQuad;
-
-        private float sendViewDataTimer = SendViewDataTime;
+		float sendViewDataTimer = SendViewDataTime;
 
         // ==============================================================================
 
         public delegate void VideoLoadedAndReadyType(); // declare delegate type
 		public VideoLoadedAndReadyType VideoIsLoadedCallback; // to store the function
 
-		public MediaLoadingState LoadingState { get { return loadingState; } }
-		public bool AdIsShowing { get { return (loadingState == MediaLoadingState.Showing); } }
-		public float AdTotalShowTime { get { return playingTime; } }
-        public float AdDuration
+		public MediaLoadingState LoadingState { get { return _loadingState; } }
+		public bool AdIsShowing { get { return (_loadingState == MediaLoadingState.Showing); } }
+		public float AdTotalShowTime => _playingTime;
+
+		public float AdDuration
         {
             get
             {
@@ -84,7 +74,7 @@ namespace VREO
                         return imageDuration;
 
                     case MediaType.Movie:
-                        return (videoPlayer != null && videoPlayer.clip != null) ? (float)videoPlayer.clip.length : 0;
+                        return (VideoPlayer != null && VideoPlayer.clip != null) ? (float)VideoPlayer.clip.length : 0;
 
                     default:
                         return 0;
@@ -93,32 +83,33 @@ namespace VREO
         }
 
 
-        public VreoResponse CurrentVreoResponse { get { return _currentVreoResponse; } }
-        public VideoPlayer VideoPlayer { get { return videoPlayer; } }
-		public VreoMovieQuad MovieQuad { get { return movieQuad; } }
+        public VreoResponse CurrentVreoResponse { get; private set; }
 
-		// ==============================================================================
+        public VideoPlayer VideoPlayer { get; private set; }
+        public VreoMovieQuad MovieQuad { get; private set; }
 
-		private void Awake()
+        // ==============================================================================
+
+		void Awake()
 		{
             if(!_initialized)
             {
                 sendViewDataTimer -= UnityEngine.Random.Range(1, 20);
                 initialRandomDelay = UnityEngine.Random.Range(0.0f, initialRandomDelay);
 
-                videoPlayer = GetComponent<VideoPlayer>();
-                renderer = GetComponent<Renderer>();
-                movieQuad = new VreoMovieQuad(this);
+                VideoPlayer = GetComponent<VideoPlayer>();
+                _renderer = GetComponent<Renderer>();
+                MovieQuad = new VreoMovieQuad(this);
 
-                if (videoPlayer == null)
+                if (VideoPlayer == null)
                     Debug.LogError("Missing Attached VideoPlayer Component");
                 else
                 {
-                    videoPlayer.prepareCompleted += VideoPlayer_PrepareCompleted;
-                    videoPlayer.loopPointReached += VideoPlayer_LoopPointReached;
+                    VideoPlayer.prepareCompleted += VideoPlayer_PrepareCompleted;
+                    VideoPlayer.loopPointReached += VideoPlayer_LoopPointReached;
                 }
 
-                if (renderer == null)
+                if (_renderer == null)
                     Debug.LogError("Missing Attached Renderer Component");
 
                 _initialized = true;
@@ -139,9 +130,9 @@ namespace VREO
         /// <param name="force">If set to <c>true</c> force a new ad to be shown immediately.</param>
         public void ShowAd(bool force = false)
 		{
-			if (loadingState == MediaLoadingState.Waiting || loadingState == MediaLoadingState.Failed || force)
+			if (_loadingState == MediaLoadingState.Waiting || _loadingState == MediaLoadingState.Failed || force)
 			{
-				loadingState = MediaLoadingState.Loading;
+				_loadingState = MediaLoadingState.Loading;
 				VreoCommunicate.RequestRandomAd(mediaType, RandomAdCallback);
 			}
 		}
@@ -151,20 +142,26 @@ namespace VREO
 		void RandomAdCallback(VreoResponse response)
 		{
 			// update local response reference for external access
-			_currentVreoResponse = response;
+			CurrentVreoResponse = response;
 
 			if (response.success)
 			{
-				if (response.result.str_MediaURL != string.Empty)
-				{               
+				if (!string.IsNullOrEmpty(response.result.str_MediaURL))
+				{
 					if (response.result.str_MediaURL.ToLower().StartsWith("http"))
+					{
 						StartCoroutine(DownloadAdMediaAndLoad(response));
+					}
 					else
+					{
 						StartCoroutine(RetrieveStreamingAsset(response));
+					}
 				}
 			}
-            else
-                StartCoroutine(RetrieveStreamingAsset(response));
+			else
+			{
+				StartCoroutine(RetrieveStreamingAsset(response));
+			}
         }
 
 		// ==============================================================================
@@ -173,17 +170,17 @@ namespace VREO
         {
 			if (source.isPrepared)
 			{
-                playingTime = 0;
-				loadingState = MediaLoadingState.Succeeded;
+                _playingTime = 0;
+				_loadingState = MediaLoadingState.Succeeded;
 
 				if(initialRandomDelay <= 0)
-                    videoPlayer.Play();
+                    VideoPlayer.Play();
 
-				if (videoPlayer.isPlaying)
-					loadingState = MediaLoadingState.Showing;
+				if (VideoPlayer.isPlaying)
+					_loadingState = MediaLoadingState.Showing;
 			}
 			else
-				loadingState = MediaLoadingState.Failed;
+				_loadingState = MediaLoadingState.Failed;
         }
 
 		void VideoPlayer_LoopPointReached(VideoPlayer source)
@@ -197,22 +194,22 @@ namespace VREO
 
 		void ShowVideo(string url)
 		{         
-			if (videoPlayer.isPlaying)
-                videoPlayer.Stop();
+			if (VideoPlayer.isPlaying)
+                VideoPlayer.Stop();
 
             // set new video player url
-			videoPlayer.url = url;
-            videoPlayer.isLooping = false;
+			VideoPlayer.url = url;
+            VideoPlayer.isLooping = false;
 
             // prepare the video
-            videoPlayer.Prepare();
+            VideoPlayer.Prepare();
 		}
 
 		// ==============================================================================
 
 		void ShowImage(WWW wwwReader)
 		{
-			loadingState = MediaLoadingState.Succeeded;
+			_loadingState = MediaLoadingState.Succeeded;
             
             // apply it to the texture
             Texture2D texture = new Texture2D(1, 1, TextureFormat.RGB24, false);
@@ -222,11 +219,11 @@ namespace VREO
 
             if (texture != null)
             {
-                renderer.material.mainTexture = texture;
-                renderer.enabled = true;
+                _renderer.material.mainTexture = texture;
+                _renderer.enabled = true;
 
-                loadingState = MediaLoadingState.Showing;
-                playingTime = 0;
+                _loadingState = MediaLoadingState.Showing;
+                _playingTime = 0;
             }
 		}
 
@@ -293,7 +290,7 @@ namespace VREO
 
 						if (wwwReader.error != null)
 						{
-							loadingState = MediaLoadingState.Failed;
+							_loadingState = MediaLoadingState.Failed;
 							Debug.LogError("wwwReader error: " + wwwReader.error);
 						}
 						else
@@ -346,7 +343,7 @@ namespace VREO
 
 			if (wwwReader.error != null)
 			{
-				loadingState = MediaLoadingState.Failed;
+				_loadingState = MediaLoadingState.Failed;
 				Debug.LogError("wwwReader error (" + streamingMediaPath + ") : " + wwwReader.error);
 			}
 			else
@@ -373,7 +370,7 @@ namespace VREO
 
 		void Update()
 		{
-			movieQuad.Update();
+			MovieQuad.Update();
 
             // send view data intermittently
             sendViewDataTimer -= Time.deltaTime;
@@ -386,7 +383,7 @@ namespace VREO
             }
 
 
-            if (loadingState == MediaLoadingState.Showing)
+            if (_loadingState == MediaLoadingState.Showing)
 			{
 				int media_type = CurrentVreoResponse.result.ID_MediaType;
 
@@ -394,11 +391,11 @@ namespace VREO
 				{
 					case MediaType.Movie:
 						{
-							if (videoPlayer != null)
+							if (VideoPlayer != null)
 							{
 								//increment total play time
-								if (videoPaused == false && videoPlayer.isPlaying)
-									playingTime += Time.deltaTime;
+								if (_videoPaused == false && VideoPlayer.isPlaying)
+									_playingTime += Time.deltaTime;
 							}
 						}
 						break;
@@ -407,21 +404,21 @@ namespace VREO
                     case MediaType.LogoSquare:
                     case MediaType.LogoWide:
                         {
-							playingTime += Time.deltaTime;
+							_playingTime += Time.deltaTime;
 
-							if (autoPlayNew && playingTime >= imageDuration)
+							if (autoPlayNew && _playingTime >= imageDuration)
 								ShowAd(true);
 						}
 						break;
 				}
 			}
-			else if (loadingState == MediaLoadingState.Succeeded && mediaType == MediaType.Movie)
+			else if (_loadingState == MediaLoadingState.Succeeded && mediaType == MediaType.Movie)
 			{
 				if (initialRandomDelay > 0)
 				{
 					initialRandomDelay -= Time.deltaTime;
 					if (initialRandomDelay <= 0)
-						VideoPlayer_PrepareCompleted(videoPlayer);
+						VideoPlayer_PrepareCompleted(VideoPlayer);
 				}
 			}
 		}
@@ -430,13 +427,13 @@ namespace VREO
 		void OnApplicationPause(bool wasPaused)
 		{
 			Debug.Log("OnApplicationPause: " + wasPaused);
-			if (videoPlayer != null)
+			if (VideoPlayer != null)
 			{
-				videoPaused = wasPaused;
-				if (videoPaused && videoPlayer.isPlaying)
-					videoPlayer.Pause();
-				else if(videoPlayer.isPrepared)
-					videoPlayer.Play();
+				_videoPaused = wasPaused;
+				if (_videoPaused && VideoPlayer.isPlaying)
+					VideoPlayer.Pause();
+				else if(VideoPlayer.isPrepared)
+					VideoPlayer.Play();
 			}
 		}      
 

@@ -1,8 +1,7 @@
 using System;
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using UnityEngine.Networking;
 
 
 namespace VREO
@@ -88,8 +87,8 @@ namespace VREO
 
 		// ==============================================================================
 
-		const string RequestRandomAdUrl = "http://api.vreo.io/ad-request";
-		const string SendViewDataUrl = "http://api.vreo.io/view-data";
+		const string RequestRandomAdUrl = "http://api.vreo.io/ad/request";
+		const string SendViewDataUrl = "http://api.vreo.io/ad/views";
 
 		static VreoCommunicate _instance;
 		static VreoCommunicate Instance
@@ -131,7 +130,6 @@ namespace VREO
 
         public static void RequestRandomAd(VreoAdCanvas.MediaType mediaType, RandomAdRequestCallback callback)
 		{
-			print("yo");
 			Instance.StartCoroutine(Instance.RequestAd(mediaType, callback));
         }
 
@@ -139,7 +137,7 @@ namespace VREO
 		{
             // request and wait for advertiser id
             RequestAdvertisingIdentifier();
-            yield return new WaitWhile(() => (HasAdvertiserId && _advertiserIdSupportEnabled));
+            yield return new WaitWhile(() => HasAdvertiserId && _advertiserIdSupportEnabled);
 
             // create new request
             var randomAdRequest = new AdRequest
@@ -155,44 +153,30 @@ namespace VREO
 			var jsonString = JsonUtility.ToJson(randomAdRequest);
 
 			var pData = System.Text.Encoding.ASCII.GetBytes(jsonString.ToCharArray());
-			var headers = new Dictionary<string, string>
-			{
-				{"Content-Type", "application/json"}, {"Authorization", developerAccessToken}
-			};
-			
-			print("Request sent");
 
-			var response = new WWW(RequestRandomAdUrl, pData, headers);
+			var request = CreateWebRequest(RequestRandomAdUrl, pData);
 
 			// Wait until the response is returned
-			yield return response;
-			
-			print("Response received");
+			yield return request.SendWebRequest();
 
-			if (!string.IsNullOrEmpty(response.error))
+			if (!string.IsNullOrEmpty(request.error))
 			{
-				Debug.LogError("Error response: " + response.error);
-				Debug.Log(response.text);
+				if (Debug.isDebugBuild)
+				{
+					print("Error response: " + request.error);
+					print("Error Message: " + request.downloadHandler.text);
+				}
 
 				var randomVreoResponse = new VreoResponse
 				{
 					success = false, result = new Result {ID_MediaType = randomAdRequest.ID_MediaType}
 				};
-
-
+				
 				callback?.Invoke(randomVreoResponse);
 			}
 			else
 			{
-				// debug log the raw response text
-				//Debug.Log(response.text);
-
-				// replace "false" and "true" to false and true
-				var resultJsonString = Regex.Replace(response.text, "\"false\"", "false", RegexOptions.IgnoreCase);
-				resultJsonString = Regex.Replace(resultJsonString, "\"true\"", "true", RegexOptions.IgnoreCase);
-
-				var randomVreoResponse = JsonUtility.FromJson<VreoResponse>(resultJsonString);
-
+				var randomVreoResponse = JsonUtility.FromJson<VreoResponse>(request.downloadHandler.text);
 				callback?.Invoke(randomVreoResponse);
 			}         
 		}
@@ -228,35 +212,24 @@ namespace VREO
 		{
             var jsonString = JsonUtility.ToJson(viewdataRequest);
 
-			Debug.Log("SEND VIEW DATA: " + jsonString);
-
             var pData = System.Text.Encoding.ASCII.GetBytes(jsonString.ToCharArray());
-            var headers = new Dictionary<string, string>
+            var request = CreateWebRequest(SendViewDataUrl, pData);
+
+            yield return request.SendWebRequest();
+
+            if (!string.IsNullOrEmpty(request.error))
             {
-	            {"Authorization", developerAccessToken},
-	            {"Content-Type", "application/json"}
-            };
-
-
-            var response = new WWW(SendViewDataUrl, pData, headers);
-
-            // Wait until the response is returned
-            yield return response;
-
-            if (!string.IsNullOrEmpty(response.error))
-            {
-                Debug.LogError("Error response: " + response.error);
-				Debug.Log("Error Message: " + response.text);
+	            if (Debug.isDebugBuild)
+	            {
+		            print("Error response: " + request.error);
+		            print("Error Message: " + request.downloadHandler.text);
+	            }
             }
             else
             {
-                Debug.Log("VIEW DATA RESPONSE: " + response.text);
+	            print("VIEW DATA RESPONSE: " + request.downloadHandler.text);
 
-                // replace "false" and "true" to false and true
-                var resultJsonString = Regex.Replace(response.text, "\"false\"", "false", RegexOptions.IgnoreCase);
-                resultJsonString = Regex.Replace(resultJsonString, "\"true\"", "true", RegexOptions.IgnoreCase);
-
-                var randomVreoResponse = JsonUtility.FromJson<VreoResponse>(resultJsonString);
+                var randomVreoResponse = JsonUtility.FromJson<VreoResponse>(request.downloadHandler.text);
             }
         }
 
@@ -265,6 +238,18 @@ namespace VREO
 		static string GetTimestampString()
 		{
 			return DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+		}
+
+		UnityWebRequest CreateWebRequest(string url, byte[] data)
+		{
+			var request = new UnityWebRequest(url, "POST")
+			{
+				uploadHandler = new UploadHandlerRaw(data), downloadHandler = new DownloadHandlerBuffer()
+			};
+			request.SetRequestHeader("Content-Type", "application/json");
+			request.SetRequestHeader("Authorization", developerAccessToken);
+
+			return request;
 		}
 
 	} // VreoCommunicate.cs
