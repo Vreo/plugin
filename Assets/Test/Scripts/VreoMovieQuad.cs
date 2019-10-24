@@ -358,7 +358,7 @@ namespace VREO
 		// ==============================================================================
 		float CalculateAdVolume()
 		{
-			if (_adCanvas.mediaType == VreoAdCanvas.MediaType.Movie)
+			if (_adCanvas.mediaType == VreoAdCanvas.MediaType.PortraitVideo || _adCanvas.mediaType == VreoAdCanvas.MediaType.LandscapeVideo)
 			{
 				var audioSource = _adCanvas.VideoPlayer.GetTargetAudioSource(0);
 

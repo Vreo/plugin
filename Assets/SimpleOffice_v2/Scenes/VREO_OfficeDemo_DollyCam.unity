@@ -399,7 +399,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc03bd95f870c6147ab59b78fe5bb52b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mediaType: 4
+  mediaType: 5
   developerGameSlotId: 0
   playOnAwake: 1
   autoPlayNew: 1
@@ -6702,7 +6702,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc03bd95f870c6147ab59b78fe5bb52b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mediaType: 1
+  mediaType: 5
   developerGameSlotId: 0
   playOnAwake: 1
   autoPlayNew: 1
@@ -12540,7 +12540,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc03bd95f870c6147ab59b78fe5bb52b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mediaType: 1
+  mediaType: 5
   developerGameSlotId: 0
   playOnAwake: 1
   autoPlayNew: 1
@@ -13769,7 +13769,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc03bd95f870c6147ab59b78fe5bb52b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mediaType: 3
+  mediaType: 2
   developerGameSlotId: 0
   playOnAwake: 1
   autoPlayNew: 1
@@ -19102,7 +19102,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc03bd95f870c6147ab59b78fe5bb52b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mediaType: 3
+  mediaType: 4
   developerGameSlotId: 0
   playOnAwake: 1
   autoPlayNew: 1
@@ -20866,7 +20866,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc03bd95f870c6147ab59b78fe5bb52b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mediaType: 4
+  mediaType: 1
   developerGameSlotId: 0
   playOnAwake: 1
   autoPlayNew: 1
@@ -22224,7 +22224,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc03bd95f870c6147ab59b78fe5bb52b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mediaType: 4
+  mediaType: 6
   developerGameSlotId: 0
   playOnAwake: 1
   autoPlayNew: 1
@@ -27722,7 +27722,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc03bd95f870c6147ab59b78fe5bb52b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mediaType: 3
+  mediaType: 1
   developerGameSlotId: 0
   playOnAwake: 1
   autoPlayNew: 0
@@ -29735,7 +29735,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc03bd95f870c6147ab59b78fe5bb52b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mediaType: 3
+  mediaType: 4
   developerGameSlotId: 0
   playOnAwake: 1
   autoPlayNew: 1

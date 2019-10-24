@@ -23,15 +23,6 @@ namespace VREO
 		public enum MediaType
 		{
 			Unknown = 0,
-			Movie = 1,
-			Image = 2,
-			Banner = 3,
-			LogoSquare = 4,
-			LogoWide = 5,
-		}
-
-		public enum ResolutionType
-		{
 			MediumRectangle = 1,
 			LargeRectangle = 2,
 			WideSkyscraper = 3,
@@ -42,7 +33,7 @@ namespace VREO
 
 		// ==============================================================================
 
-		public MediaType mediaType = MediaType.Movie;
+		public MediaType mediaType = MediaType.LandscapeVideo;
 		public string developerGameSlotId = "0";
 
 		public bool playOnAwake = true;
@@ -89,15 +80,15 @@ namespace VREO
 			{
 				switch (mediaType)
 				{
-					case MediaType.Image:
-					case MediaType.Banner:
-					case MediaType.LogoSquare:
-					case MediaType.LogoWide:
+					case MediaType.MediumRectangle:
+					case MediaType.LargeRectangle:
+					case MediaType.WideSkyscraper:
+					case MediaType.Leaderboard:
 						return imageDuration;
 
-					case MediaType.Movie:
+					case MediaType.LandscapeVideo:
+					case MediaType.PortraitVideo:
 						return (VideoPlayer != null && VideoPlayer.clip != null) ? (float) VideoPlayer.clip.length : 0;
-
 					default:
 						return 0;
 				}
@@ -110,27 +101,27 @@ namespace VREO
 		public VideoPlayer VideoPlayer { get; private set; }
 		public VreoMovieQuad MovieQuad { get; private set; }
 
-		public static Vector2Int SizeForResolutionType(ResolutionType type)
+		public static Vector2Int SizeForResolutionType(MediaType type)
 		{
 			Vector2Int result;
 			switch (type)
 			{
-				case ResolutionType.MediumRectangle:
+				case MediaType.MediumRectangle:
 					result = new Vector2Int(300, 250);
 					break;
-				case ResolutionType.LargeRectangle:
+				case MediaType.LargeRectangle:
 					result = new Vector2Int(300, 600);
 					break;
-				case ResolutionType.WideSkyscraper:
+				case MediaType.WideSkyscraper:
 					result = new Vector2Int(160, 600);
 					break;
-				case ResolutionType.Leaderboard:
+				case MediaType.Leaderboard:
 					result = new Vector2Int(728, 90);
 					break;
-				case ResolutionType.LandscapeVideo:
+				case MediaType.LandscapeVideo:
 					result = new Vector2Int(540, 300);
 					break;
-				case ResolutionType.PortraitVideo:
+				case MediaType.PortraitVideo:
 					result = new Vector2Int(300, 540);
 					break;
 				default:
@@ -330,14 +321,14 @@ namespace VREO
 		IEnumerator DownloadAdMediaAndLoad(VreoResponse response)
 		{
 			var mediaType = response.result.ID_MediaType;
-			string mediaFormat = response.result.str_MediaTypeName;
+			var mediaFormat = response.result.str_MediaTypeName;
 
 			switch ((MediaType) mediaType)
 			{
-				case MediaType.Image:
-				case MediaType.Banner:
-				case MediaType.LogoSquare:
-				case MediaType.LogoWide:
+				case MediaType.MediumRectangle:
+				case MediaType.LargeRectangle:
+				case MediaType.WideSkyscraper:
+				case MediaType.Leaderboard:
 				{
 					WWW wwwReader = new WWW(response.result.str_MediaURL);
 					yield return wwwReader;
@@ -361,7 +352,8 @@ namespace VREO
 					}
 					break;
 				}
-				case MediaType.Movie:
+				case MediaType.LandscapeVideo:
+				case MediaType.PortraitVideo:
 				{
 					ShowVideo(response.result.str_MediaURL);
 					break;
@@ -379,7 +371,8 @@ namespace VREO
 			{
 				switch ((MediaType) response.result.ID_MediaType)
 				{
-					case MediaType.Movie:
+					case MediaType.LandscapeVideo:
+					case MediaType.PortraitVideo:
 						mediaUrl = "vreo_placeholder_video.mp4";
 						break;
 					default:
@@ -405,14 +398,15 @@ namespace VREO
 
 				switch ((MediaType) media_type)
 				{
-					case MediaType.Image:
-					case MediaType.Banner:
-					case MediaType.LogoSquare:
-					case MediaType.LogoWide:
+					case MediaType.MediumRectangle:
+					case MediaType.LargeRectangle:
+					case MediaType.WideSkyscraper:
+					case MediaType.Leaderboard:
 						ShowImage(wwwReader);
 						break;
 
-					case MediaType.Movie:
+					case MediaType.LandscapeVideo:
+					case MediaType.PortraitVideo:
 						ShowVideo(wwwReader.url);
 						break;
 				}
@@ -431,41 +425,42 @@ namespace VREO
 			{
 				sendViewDataTimer = SendViewDataTime;
 
-				ViewDataRequest viewStat = MovieQuad.GetViewingData();
+				var viewStat = MovieQuad.GetViewingData();
 				VreoCommunicate.__SendViewData(viewStat);
 			}
 
 
 			if (_loadingState == MediaLoadingState.Showing)
 			{
-				int media_type = CurrentVreoResponse.result.ID_MediaType;
+				var type = (MediaType) CurrentVreoResponse.result.ID_MediaType;
 
-				switch ((MediaType) media_type)
+				switch (type)
 				{
-					case MediaType.Movie:
+					case MediaType.LandscapeVideo:
+					case MediaType.PortraitVideo:
 					{
-						if (VideoPlayer != null)
+						if (VideoPlayer)
 						{
 							//increment total play time
 							if (_videoPaused == false && VideoPlayer.isPlaying)
 								_playingTime += Time.deltaTime;
 						}
-					}
 						break;
-					case MediaType.Image:
-					case MediaType.Banner:
-					case MediaType.LogoSquare:
-					case MediaType.LogoWide:
+					}
+					case MediaType.MediumRectangle:
+					case MediaType.LargeRectangle:
+					case MediaType.WideSkyscraper:
+					case MediaType.Leaderboard:
 					{
 						_playingTime += Time.deltaTime;
 
 						if (autoPlayNew && _playingTime >= imageDuration)
 							ShowAd(true);
-					}
 						break;
+					}
 				}
 			}
-			else if (_loadingState == MediaLoadingState.Succeeded && mediaType == MediaType.Movie)
+			else if (_loadingState == MediaLoadingState.Succeeded && (mediaType == MediaType.LandscapeVideo || mediaType == MediaType.PortraitVideo))
 			{
 				if (initialRandomDelay > 0)
 				{

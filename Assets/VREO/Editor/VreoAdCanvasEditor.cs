@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor;
+﻿using UnityEditor;
 
 namespace VREO
 {
@@ -37,14 +34,15 @@ namespace VREO
 
             switch ((VreoAdCanvas.MediaType)mediaType.enumValueIndex)
             {
-                case VreoAdCanvas.MediaType.Image:
-                case VreoAdCanvas.MediaType.Banner:
-                case VreoAdCanvas.MediaType.LogoSquare:
-                case VreoAdCanvas.MediaType.LogoWide:
+	            case VreoAdCanvas.MediaType.MediumRectangle:
+	            case VreoAdCanvas.MediaType.LargeRectangle:
+	            case VreoAdCanvas.MediaType.WideSkyscraper:
+	            case VreoAdCanvas.MediaType.Leaderboard:
                     EditorGUILayout.PropertyField(imageDuration);
                     break;
 
-                case VreoAdCanvas.MediaType.Movie:
+                case VreoAdCanvas.MediaType.PortraitVideo:
+                case VreoAdCanvas.MediaType.LandscapeVideo:
                     EditorGUILayout.PropertyField(initialRandomDelay);
                     break;
 
