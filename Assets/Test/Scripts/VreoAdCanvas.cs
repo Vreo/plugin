@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using System.Collections;
+using System.IO;
 using UnityEngine.Video;
 
 namespace VREO
@@ -54,7 +55,7 @@ namespace VREO
 
 		Renderer _renderer;
 
-		float sendViewDataTimer = SendViewDataTime;
+		float _sendViewDataTimer = SendViewDataTime;
 
 		// ==============================================================================
 
@@ -139,7 +140,7 @@ namespace VREO
 		{
 			if (!_initialized)
 			{
-				sendViewDataTimer -= UnityEngine.Random.Range(1, 20);
+				_sendViewDataTimer -= UnityEngine.Random.Range(1, 20);
 				initialRandomDelay = UnityEngine.Random.Range(0.0f, initialRandomDelay);
 
 				VideoPlayer = GetComponent<VideoPlayer>();
@@ -320,10 +321,10 @@ namespace VREO
 
 		IEnumerator DownloadAdMediaAndLoad(VreoResponse response)
 		{
-			var mediaType = response.result.ID_MediaType;
+			var type = response.result.ID_MediaType;
 			var mediaFormat = response.result.str_MediaTypeName;
 
-			switch ((MediaType) mediaType)
+			switch ((MediaType) type)
 			{
 				case MediaType.MediumRectangle:
 				case MediaType.LargeRectangle:
@@ -381,8 +382,7 @@ namespace VREO
 				}
 			}
 
-			//string streamingMediaPath = "file:///" + mediaFileName;
-			string streamingMediaPath = "file://" + Application.streamingAssetsPath + "/" + mediaUrl;
+			var streamingMediaPath = Path.Combine(Application.streamingAssetsPath, mediaUrl);
 
 			WWW wwwReader = new WWW(streamingMediaPath);
 			yield return wwwReader;
@@ -420,10 +420,10 @@ namespace VREO
 			MovieQuad.Update();
 
 			// send view data intermittently
-			sendViewDataTimer -= Time.deltaTime;
-			if (sendViewDataTimer <= 0.0f)
+			_sendViewDataTimer -= Time.deltaTime;
+			if (_sendViewDataTimer <= 0.0f)
 			{
-				sendViewDataTimer = SendViewDataTime;
+				_sendViewDataTimer = SendViewDataTime;
 
 				var viewStat = MovieQuad.GetViewingData();
 				VreoCommunicate.__SendViewData(viewStat);
