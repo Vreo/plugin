@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using System.Collections;
 using System.IO;
@@ -45,6 +44,8 @@ namespace VREO
 
 		public float imageDuration = 10.0f;
 
+		public string spotId;
+
 		// ==============================================================================
 
 		bool _initialized;
@@ -89,7 +90,7 @@ namespace VREO
 
 					case MediaType.LandscapeVideo:
 					case MediaType.PortraitVideo:
-						return (VideoPlayer != null && VideoPlayer.clip != null) ? (float) VideoPlayer.clip.length : 0;
+						return VideoPlayer != null && VideoPlayer.clip != null ? (float) VideoPlayer.clip.length : 0;
 					default:
 						return 0;
 				}
@@ -140,8 +141,8 @@ namespace VREO
 		{
 			if (!_initialized)
 			{
-				_sendViewDataTimer -= UnityEngine.Random.Range(1, 20);
-				initialRandomDelay = UnityEngine.Random.Range(0.0f, initialRandomDelay);
+				_sendViewDataTimer -= Random.Range(1, 20);
+				initialRandomDelay = Random.Range(0.0f, initialRandomDelay);
 
 				VideoPlayer = GetComponent<VideoPlayer>();
 				_renderer = GetComponent<Renderer>();
@@ -179,7 +180,7 @@ namespace VREO
 			if (_loadingState == MediaLoadingState.Waiting || _loadingState == MediaLoadingState.Failed || force)
 			{
 				_loadingState = MediaLoadingState.Loading;
-				VreoCommunicate.RequestRandomAd(mediaType, RandomAdCallback);
+				VreoCommunicate.RequestRandomAd(mediaType, spotId, RandomAdCallback);
 			}
 		}
 

@@ -13,6 +13,7 @@ namespace VREO
 		public string str_DevAccessToken;
 		public int ID_Game;
 		public int ID_MediaType;
+		public string ID_Spot;
 		public string str_Device;
 		public string dat_Timestamp;
 		public float dec_Latitude;
@@ -128,12 +129,12 @@ namespace VREO
         // RequestRandomAd
         // ==============================================================================
 
-        public static void RequestRandomAd(VreoAdCanvas.MediaType mediaType, RandomAdRequestCallback callback)
+        public static void RequestRandomAd(VreoAdCanvas.MediaType mediaType, string spotId, RandomAdRequestCallback callback)
 		{
-			Instance.StartCoroutine(Instance.RequestAd(mediaType, callback));
+			Instance.StartCoroutine(Instance.RequestAd(mediaType, spotId, callback));
         }
 
-        IEnumerator RequestAd(VreoAdCanvas.MediaType mediaType, RandomAdRequestCallback callback = null)
+        IEnumerator RequestAd(VreoAdCanvas.MediaType mediaType, string spotId, RandomAdRequestCallback callback = null)
 		{
             // request and wait for advertiser id
             RequestAdvertisingIdentifier();
@@ -146,6 +147,7 @@ namespace VREO
 				str_DevAccessToken = developerAccessToken,
 				ID_Game = developerGameId,
 				ID_MediaType = (int) mediaType,
+				ID_Spot = spotId,
 				str_Device = DeviceId,
 				dat_Timestamp = GetTimestampString()
             };
@@ -189,26 +191,26 @@ namespace VREO
         {
             Instance.SendViewData(viewDataRequest);
         }
-		public void SendViewData(ViewDataRequest viewdataRequest)
+		public void SendViewData(ViewDataRequest viewDataRequest)
 		{
-            viewdataRequest.ID_Game = developerGameId;
-            viewdataRequest.str_DevAccessToken = developerAccessToken;
+            viewDataRequest.ID_Game = developerGameId;
+            viewDataRequest.str_DevAccessToken = developerAccessToken;
 
-            viewdataRequest.str_Device = DeviceId;
-            viewdataRequest.str_Platform = Application.platform.ToString();
-            viewdataRequest.bit_withVR = UnityEngine.XR.XRDevice.isPresent ? 1 : 0;
+            viewDataRequest.str_Device = DeviceId;
+            viewDataRequest.str_Platform = Application.platform.ToString();
+            viewDataRequest.bit_withVR = UnityEngine.XR.XRDevice.isPresent ? 1 : 0;
 
-            viewdataRequest.dat_Timestamp = GetTimestampString();
-			viewdataRequest.str_IDFA = HasAdvertiserId ? _advertiserId : "";
+            viewDataRequest.dat_Timestamp = GetTimestampString();
+			viewDataRequest.str_IDFA = HasAdvertiserId ? _advertiserId : "";
 
-            StartCoroutine(RequestSendViewData(viewdataRequest, SendViewDataUrl));
+            StartCoroutine(RequestSendViewData(viewDataRequest));
 		}      
 
 		// ==============================================================================
 		// RequestSendViewData_Coroutine
 		// ==============================================================================
 
-		IEnumerator RequestSendViewData(ViewDataRequest viewdataRequest, string requestUrl)
+		IEnumerator RequestSendViewData(ViewDataRequest viewdataRequest)
 		{
             var jsonString = JsonUtility.ToJson(viewdataRequest);
 

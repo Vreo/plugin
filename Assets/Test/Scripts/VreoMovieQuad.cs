@@ -102,7 +102,7 @@ namespace VREO
 			if (_systemTime > 0f)
 			{
 				_avgVolumePercent =
-					(_avgVolumePercent * _systemTime + ((CalculateAdVolume() * 100.0f) * Time.deltaTime)) /
+					(_avgVolumePercent * _systemTime + CalculateAdVolume() * 100 * Time.deltaTime) /
 					(_systemTime + Time.deltaTime);
 
 				// transform quad center point

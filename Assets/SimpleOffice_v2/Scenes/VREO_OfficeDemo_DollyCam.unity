@@ -405,6 +405,7 @@ MonoBehaviour:
   autoPlayNew: 1
   initialRandomDelay: 2
   imageDuration: 10
+  spotId: spot11
 --- !u!1001 &6829348
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3425,6 +3426,7 @@ MonoBehaviour:
   autoPlayNew: 0
   initialRandomDelay: 0
   imageDuration: 10
+  spotId: spot4
 --- !u!1001 &188943043
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4009,6 +4011,7 @@ MonoBehaviour:
   autoPlayNew: 1
   initialRandomDelay: 2
   imageDuration: 10
+  spotId: spot10
 --- !u!1001 &216317596
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6708,6 +6711,7 @@ MonoBehaviour:
   autoPlayNew: 1
   initialRandomDelay: 2
   imageDuration: 10
+  spotId: spot8
 --- !u!1001 &429875124
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9573,6 +9577,7 @@ MonoBehaviour:
   autoPlayNew: 0
   initialRandomDelay: 0
   imageDuration: 10
+  spotId: spot9
 --- !u!1001 &611074780
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12546,6 +12551,7 @@ MonoBehaviour:
   autoPlayNew: 1
   initialRandomDelay: 2
   imageDuration: 10
+  spotId: spot
 --- !u!1 &833957658
 GameObject:
   m_ObjectHideFlags: 0
@@ -13775,6 +13781,7 @@ MonoBehaviour:
   autoPlayNew: 1
   initialRandomDelay: 2
   imageDuration: 10
+  spotId: spot12
 --- !u!1001 &880783076
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19108,6 +19115,7 @@ MonoBehaviour:
   autoPlayNew: 1
   initialRandomDelay: 2
   imageDuration: 10
+  spotId: spot7
 --- !u!1001 &1176290328
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -20188,6 +20196,16 @@ PrefabInstance:
       propertyPath: mediaType
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 114934620560324512, guid: 52bc9497cc29145e78aa1f44b5b12fd2,
+        type: 3}
+      propertyPath: playOnAwake
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114934620560324512, guid: 52bc9497cc29145e78aa1f44b5b12fd2,
+        type: 3}
+      propertyPath: spotId
+      value: spot1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 52bc9497cc29145e78aa1f44b5b12fd2, type: 3}
 --- !u!1 &1258696694
@@ -20872,6 +20890,7 @@ MonoBehaviour:
   autoPlayNew: 1
   initialRandomDelay: 2
   imageDuration: 10
+  spotId: spot14
 --- !u!1001 &1295296976
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21380,6 +21399,7 @@ MonoBehaviour:
   autoPlayNew: 0
   initialRandomDelay: 0
   imageDuration: 10
+  spotId: spot13
 --- !u!1001 &1307099570
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -22230,6 +22250,7 @@ MonoBehaviour:
   autoPlayNew: 1
   initialRandomDelay: 2
   imageDuration: 10
+  spotId: spot3
 --- !u!1001 &1362242175
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -27728,6 +27749,7 @@ MonoBehaviour:
   autoPlayNew: 0
   initialRandomDelay: 0
   imageDuration: 10
+  spotId: spot6
 --- !u!1001 &1726612155
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -29741,6 +29763,7 @@ MonoBehaviour:
   autoPlayNew: 1
   initialRandomDelay: 2
   imageDuration: 10
+  spotId: spot2
 --- !u!1 &1876934350
 GameObject:
   m_ObjectHideFlags: 0
@@ -32532,6 +32555,7 @@ MonoBehaviour:
   autoPlayNew: 0
   initialRandomDelay: 0
   imageDuration: 10
+  spotId: spot5
 --- !u!1001 &2030744498
 PrefabInstance:
   m_ObjectHideFlags: 0
