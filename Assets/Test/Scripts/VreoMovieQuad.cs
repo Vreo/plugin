@@ -75,7 +75,7 @@ namespace VREO
 		// ==============================================================================
 		public ViewDataRequest GetViewingData()
 		{
-			var viewStat = new ViewDataRequest
+			return new ViewDataRequest
 			{
 				ID_Advertisement = _adCanvas.CurrentVreoResponse.result.ID_Advertisement,
 				dec_TotalHitTime = _totalHitTime,
@@ -83,10 +83,9 @@ namespace VREO
 				dec_TotalScreenPositionX = _avgTotalScreenPosition.x,
 				dec_TotalScreenPositionY = _avgTotalScreenPosition.y,
 				dec_TotalBlockedPercentage = _avgBlockedAreaPercent,
-				dec_TotalVolumePercentage = _avgVolumePercent
+				dec_TotalVolumePercentage = _avgVolumePercent,
+				ID_Spot = _adCanvas.spotId
 			};
-
-			return viewStat;
 		}
 
 		// ==============================================================================

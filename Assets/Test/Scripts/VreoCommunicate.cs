@@ -37,6 +37,7 @@ namespace VREO
         public string str_DevAccessToken;
         public int ID_Game;
         public int ID_Advertisement;
+        public string ID_Spot;
 
         public float dec_TotalHitTime;
 		public float dec_TotalScreenPercentage;

@@ -395,9 +395,7 @@ namespace VREO
 			}
 			else
 			{
-				int media_type = response.result.ID_MediaType;
-
-				switch ((MediaType) media_type)
+				switch ((MediaType) response.result.ID_MediaType)
 				{
 					case MediaType.MediumRectangle:
 					case MediaType.LargeRectangle:
