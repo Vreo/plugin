@@ -188,6 +188,10 @@ namespace VREO
 
 		void RandomAdCallback(VreoResponse response)
 		{
+			if (response == null)
+			{
+				return;
+			}
 			// update local response reference for external access
 			CurrentVreoResponse = response;
 
@@ -221,7 +225,9 @@ namespace VREO
 				_loadingState = MediaLoadingState.Succeeded;
 
 				if (initialRandomDelay <= 0)
+				{
 					VideoPlayer.Play();
+				}
 
 				if (VideoPlayer.isPlaying)
 					_loadingState = MediaLoadingState.Showing;
