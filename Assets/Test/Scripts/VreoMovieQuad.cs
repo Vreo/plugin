@@ -2,394 +2,398 @@ using UnityEngine;
 
 namespace VREO
 {
-    public class VreoMovieQuad
+	public class VreoMovieQuad
 	{
-		private Camera targetCamera;
-		private VreoAdCanvas adCanvas;
-        private AudioListener targetListener;
+		Camera _targetCamera;
+		VreoAdCanvas _adCanvas;
+		AudioListener _targetListener;
 
-		private int numOccluderQueriesX = 4;
-		private int numOccluderQueriesY = 3;
-        
-		private int numOccluderQueries;
-		private Vector3[] occluderQueriesCoords = null;
-		private Vector3[] cornerCoords = null;
+		int _numOccluderQueriesX = 4;
+		int _numOccluderQueriesY = 3;
 
-		private bool debugLinesEnabled = false;
+		int _numOccluderQueries;
+		Vector3[] _occluderQueriesCoords;
+		Vector3[] _cornerCoords;
 
-		private float total_hit_time = 0.0f;
-		private float avg_screenPercent = 0.0f;
-		private float avg_blockedAreaPercent = 0.0f;
-        private float avg_volumePercent = 0.0f;
+		bool debugLinesEnabled = false;
 
-        private Vector2 avg_total_sceen_positon = new Vector2();
+		float _totalHitTime;
+		float _avgScreenPercent;
+		float _avgBlockedAreaPercent;
+		float _avgVolumePercent;
 
-        private float systemViewTime = 0.0f;
-        private float systemTime = 0.0f;
+		Vector2 _avgTotalScreenPosition;
 
-        private Vector3[] buf1 = new Vector3[16]; // just temporary buffers, big engough for handling all cases
-        private Vector3[] buf2 = new Vector3[16];
+		float _systemViewTime;
+		float _systemTime;
 
-        // ==============================================================================
+		Vector3[] _buf1 = new Vector3[16]; // just temporary buffers, big enough for handling all cases
+		Vector3[] _buf2 = new Vector3[16];
 
-        public VreoMovieQuad(VreoAdCanvas adCanvas)
+		// ==============================================================================
+
+		public VreoMovieQuad(VreoAdCanvas adCanvas)
 		{
-			this.adCanvas = adCanvas;
-			this.targetCamera = Camera.main;
+			_adCanvas = adCanvas;
+			_targetCamera = Camera.main;
 
-            this.targetListener = GameObject.FindObjectOfType<AudioListener>();
+			_targetListener = Object.FindObjectOfType<AudioListener>();
 
-            total_hit_time = 0.0f;
-            avg_screenPercent = 0.0f;
-			avg_total_sceen_positon = Vector2.zero;
+			_totalHitTime = 0.0f;
+			_avgScreenPercent = 0.0f;
+			_avgTotalScreenPosition = Vector2.zero;
 
-			// create the occulder query offsets
-			numOccluderQueries = numOccluderQueriesX * numOccluderQueriesY;
-			occluderQueriesCoords = new Vector3[numOccluderQueries];
+			// create the occluder query offsets
+			_numOccluderQueries = _numOccluderQueriesX * _numOccluderQueriesY;
+			_occluderQueriesCoords = new Vector3[_numOccluderQueries];
 
-			int i = 0;
-			float xStep = 1.0f / (float)(numOccluderQueriesX);
-			float yStep = 1.0f / (float)(numOccluderQueriesY);
-			for (int y = 0; y < numOccluderQueriesY; y++)
+			var i = 0;
+			var xStep = 1f / _numOccluderQueriesX;
+			var yStep = 1f / _numOccluderQueriesY;
+			for (var y = 0; y < _numOccluderQueriesY; y++)
 			{
-				for (int x = 0; x < numOccluderQueriesX; x++)
+				for (var x = 0; x < _numOccluderQueriesX; x++)
 				{
-					float xpos = (float)x * xStep + xStep * 0.5f;
-					float ypos = (float)y * yStep + yStep * 0.5f;
-					xpos = xpos - 0.5f; // center
-					ypos = ypos - 0.5f;
-					occluderQueriesCoords[i++] = new Vector3(xpos, ypos, 0.0f);
+					var xPos = x * xStep + xStep * 0.5f;
+					var yPos = y * yStep + yStep * 0.5f;
+					xPos -= 0.5f;
+					yPos -= 0.5f;
+					_occluderQueriesCoords[i++] = new Vector3(xPos, yPos, 0.0f);
 				}
 			}
 
-			// create the cornder coords
-			cornerCoords = new Vector3[4];
-			cornerCoords[0] = new Vector3(-0.5f, 0.5f, 0.0f);
-			cornerCoords[1] = new Vector3(0.5f, 0.5f, 0.0f);
-			cornerCoords[2] = new Vector3(0.5f, -0.5f, 0.0f);
-			cornerCoords[3] = new Vector3(-0.5f, -0.5f, 0.0f);
+			// create the corner coords
+			_cornerCoords = new Vector3[4];
+			_cornerCoords[0] = new Vector3(-0.5f, 0.5f, 0.0f);
+			_cornerCoords[1] = new Vector3(0.5f, 0.5f, 0.0f);
+			_cornerCoords[2] = new Vector3(0.5f, -0.5f, 0.0f);
+			_cornerCoords[3] = new Vector3(-0.5f, -0.5f, 0.0f);
 		}
 
-        // ==============================================================================
-        // GetViewingData
-        // ==============================================================================
-        public ClassViewDataRequest GetViewingData()
-        {
-            ClassViewDataRequest viewStat = new ClassViewDataRequest();
-
-            //viewStat.str_DevAccessToken = this.adCanvas.CurrentAdResponse.body.result.developer_transaction_token;
-            //viewStat.developer_game_slot_id = this.adCanvas.developer_game_slot_id;
-
-            //viewStat.advert = this.adCanvas.CurrentAdResponse.body.result.advertiser_ad_id;
-            //viewStat.advertiser_ad_is_visual = true;
-            //viewStat.advertiser_ad_is_aural = (this.adCanvas.mediaType == VreoAdCanvas.MediaType.MOVIE);
-
-            viewStat.ID_Advertisement = adCanvas.CurrentAdResponse.result.ID_Advertisement.ToString();
-
-            viewStat.dec_TotalHitTime = total_hit_time;
-            viewStat.dec_TotalScreenPercentage = avg_screenPercent;
-            viewStat.dec_TotalScreenPositionX = avg_total_sceen_positon.x;
-            viewStat.dec_TotalScreenPositionY = avg_total_sceen_positon.y;
-            viewStat.dec_TotalBlockedPercentage = avg_blockedAreaPercent;
-            viewStat.dec_TotalVolumePercentage = avg_volumePercent;
-
-            return viewStat;
-        }
-
-        // ==============================================================================
-        // Update
-        // ==============================================================================
-        public void Update()
+		// ==============================================================================
+		// GetViewingData
+		// ==============================================================================
+		public ViewDataRequest GetViewingData()
 		{
-			float blockedAreaPercent = 0.0f;
-			int blockedCount = 0;
-			float area = 0.0f;
-			float percentualArea = 0.0f;
+			return new ViewDataRequest
+			{
+				ID_Advertisement = _adCanvas.CurrentVreoResponse.result.ID_Advertisement,
+				dec_TotalHitTime = _totalHitTime,
+				dec_TotalScreenPercentage = _avgScreenPercent,
+				dec_TotalScreenPositionX = _avgTotalScreenPosition.x,
+				dec_TotalScreenPositionY = _avgTotalScreenPosition.y,
+				dec_TotalBlockedPercentage = _avgBlockedAreaPercent,
+				dec_TotalVolumePercentage = _avgVolumePercent,
+				ID_Spot = _adCanvas.spotId
+			};
+		}
+
+		// ==============================================================================
+		// Update
+		// ==============================================================================
+		public void Update()
+		{
+			var blockedAreaPercent = 0f;
+			var area = 0f;
+			var percentualArea = 0f;
 
 			// ignore 1st frame, cause of initialization
-			if (systemTime > 0.0f)
+			if (_systemTime > 0f)
 			{
-                avg_volumePercent = (avg_volumePercent * systemTime + ((CalculateAdVolume() * 100.0f) * Time.deltaTime)) / (systemTime + Time.deltaTime);
+				_avgVolumePercent =
+					(_avgVolumePercent * _systemTime + CalculateAdVolume() * 100 * Time.deltaTime) /
+					(_systemTime + Time.deltaTime);
 
-                // transform quad center point
-                Vector3 worldCenterPoint = TransformToScreen(adCanvas.transform.TransformPoint(Vector3.zero));
+				// transform quad center point
+				var worldCenterPoint = TransformToScreen(_adCanvas.transform.TransformPoint(Vector3.zero));
 
 				// transform quad corners
-				Vector3 worldCoord0 = TransformToScreen(adCanvas.transform.TransformPoint(cornerCoords[0]));
-				Vector3 worldCoord1 = TransformToScreen(adCanvas.transform.TransformPoint(cornerCoords[1]));
-				Vector3 worldCoord2 = TransformToScreen(adCanvas.transform.TransformPoint(cornerCoords[2]));
-				Vector3 worldCoord3 = TransformToScreen(adCanvas.transform.TransformPoint(cornerCoords[3]));
+				var worldCoord0 = TransformToScreen(_adCanvas.transform.TransformPoint(_cornerCoords[0]));
+				var worldCoord1 = TransformToScreen(_adCanvas.transform.TransformPoint(_cornerCoords[1]));
+				var worldCoord2 = TransformToScreen(_adCanvas.transform.TransformPoint(_cornerCoords[2]));
+				var worldCoord3 = TransformToScreen(_adCanvas.transform.TransformPoint(_cornerCoords[3]));
 
 				// clip quad to viewport
-				Vector3[] buffer;
-				int count = 0;
-				buffer = ClipPolygon(worldCoord0, worldCoord1, worldCoord2, worldCoord3, targetCamera.pixelRect, ref count);
+				var count = 0;
+				var buffer = ClipPolygon(worldCoord0, worldCoord1, worldCoord2, worldCoord3, _targetCamera.pixelRect,
+					ref count);
 				if (buffer != null)
 				{
 					// calculate the 2d area of the remaining quad
 					area = CalculateBufferAreaSize(buffer, count);
-                    if (area > 0.0f) // if the area is zero of negative, the quad is not visible
-                    {
-                        percentualArea = 100.0f * area / (float)(targetCamera.pixelRect.width * targetCamera.pixelRect.height);
+					if (area > 0f) // if the area is zero of negative, the quad is not visible
+					{
+						percentualArea = 100f * area / (_targetCamera.pixelRect.width * _targetCamera.pixelRect.height);
 
-                        blockedCount = 0;
-                        for (int i = 0; i < numOccluderQueries; i++)
-                        {
-                            if (Physics.Linecast(targetCamera.transform.position, adCanvas.transform.TransformPoint(occluderQueriesCoords[i])))
-                            {
-                                blockedCount++;
+						var blockedCount = 0;
+						for (var i = 0; i < _numOccluderQueries; i++)
+						{
+							if (Physics.Linecast(_targetCamera.transform.position,
+								_adCanvas.transform.TransformPoint(_occluderQueriesCoords[i])))
+							{
+								blockedCount++;
 #if UNITY_EDITOR
-                                if (debugLinesEnabled == true)
-                                    Debug.DrawLine(targetCamera.transform.position, adCanvas.transform.TransformPoint(occluderQueriesCoords[i]), Color.red);
+								if (debugLinesEnabled)
+									Debug.DrawLine(_targetCamera.transform.position,
+										_adCanvas.transform.TransformPoint(_occluderQueriesCoords[i]), Color.red);
 #endif
-                            }
+							}
 #if UNITY_EDITOR
-                            else
-                            {
-                                if (debugLinesEnabled == true)
-                                    Debug.DrawLine(targetCamera.transform.position, adCanvas.transform.TransformPoint(occluderQueriesCoords[i]), Color.green);
-                            }
+							else
+							{
+								if (debugLinesEnabled)
+									Debug.DrawLine(_targetCamera.transform.position,
+										_adCanvas.transform.TransformPoint(_occluderQueriesCoords[i]), Color.green);
+							}
 #endif
-                        }
+						}
 
-                        blockedAreaPercent = 100.0f * (float)blockedCount / (float)numOccluderQueries;
+						blockedAreaPercent = 100.0f * blockedCount / _numOccluderQueries;
 
-                        float screen_percentage = area * (100.0f - blockedAreaPercent);
-                        screen_percentage /= targetCamera.pixelRect.width * targetCamera.pixelRect.height;
-                        avg_screenPercent = (avg_screenPercent * systemViewTime + screen_percentage * Time.deltaTime) / (systemViewTime + Time.deltaTime);
+						var screenPercentage = area * (100.0f - blockedAreaPercent);
+						screenPercentage /= _targetCamera.pixelRect.width * _targetCamera.pixelRect.height;
+						_avgScreenPercent = (_avgScreenPercent * _systemViewTime + screenPercentage * Time.deltaTime) /
+						                    (_systemViewTime + Time.deltaTime);
 
-                        // averaging screen position
-                        float x = worldCenterPoint.x - Screen.width * 0.5f;
-                        float y = worldCenterPoint.y - Screen.height * 0.5f;
-                        avg_total_sceen_positon.x = (avg_total_sceen_positon.x * systemViewTime + x * Time.deltaTime) / (systemViewTime + Time.deltaTime);
-                        avg_total_sceen_positon.y = (avg_total_sceen_positon.y * systemViewTime + y * Time.deltaTime) / (systemViewTime + Time.deltaTime);
-                        avg_total_sceen_positon.y = y;
+						// averaging screen position
+						var x = worldCenterPoint.x - Screen.width * 0.5f;
+						var y = worldCenterPoint.y - Screen.height * 0.5f;
+						_avgTotalScreenPosition.x = (_avgTotalScreenPosition.x * _systemViewTime + x * Time.deltaTime) /
+						                            (_systemViewTime + Time.deltaTime);
+						_avgTotalScreenPosition.y = (_avgTotalScreenPosition.y * _systemViewTime + y * Time.deltaTime) /
+						                            (_systemViewTime + Time.deltaTime);
+						_avgTotalScreenPosition.y = y;
 
-                        avg_blockedAreaPercent = (avg_blockedAreaPercent * systemViewTime + blockedAreaPercent * Time.deltaTime) / (systemViewTime + Time.deltaTime);
-                        systemViewTime += Time.deltaTime;
-                    }
-                }
+						_avgBlockedAreaPercent =
+							(_avgBlockedAreaPercent * _systemViewTime + blockedAreaPercent * Time.deltaTime) /
+							(_systemViewTime + Time.deltaTime);
+						_systemViewTime += Time.deltaTime;
+					}
+				}
 
-				if (area > 0.0f && blockedAreaPercent < 100.0f)
+				if (area > 0.0f && blockedAreaPercent < 100f)
 				{
-					total_hit_time += Time.deltaTime;
+					_totalHitTime += Time.deltaTime;
 				}
 			}
 
-			systemTime += Time.deltaTime;
+			_systemTime += Time.deltaTime;
 		}
 
 		// ==============================================================================
 		// TransformToScreen2
 		// ==============================================================================
-		private Vector3 TransformToScreen(Vector3 worldPt)
+		Vector3 TransformToScreen(Vector3 worldPt)
 		{
-			Vector3 screenPos = targetCamera.WorldToScreenPoint(worldPt);
-			screenPos.z = targetCamera.nearClipPlane;
+			var screenPos = _targetCamera.WorldToScreenPoint(worldPt);
+			screenPos.z = _targetCamera.nearClipPlane;
 			return screenPos;
 		}
 
 		// ==============================================================================
 		// ClipTriangle
 		// ==============================================================================
-		private Vector3[] ClipPolygon(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3, Rect cameraPixelRect, ref int count)
+		Vector3[] ClipPolygon(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3, Rect cameraPixelRect,
+			ref int count)
 		{
-			float left = cameraPixelRect.xMin;
-			float right = cameraPixelRect.xMax;
-			float bottom = cameraPixelRect.yMin;
-			float top = cameraPixelRect.yMax;
+			var left = cameraPixelRect.xMin;
+			var right = cameraPixelRect.xMax;
+			var bottom = cameraPixelRect.yMin;
+			var top = cameraPixelRect.yMax;
 			float t;
 
-			int i, count1, count2;
-
-			buf1[0] = v0;
-			buf1[1] = v1;
-			buf1[2] = v2;
-			buf1[3] = v3;
-			buf1[4] = v0; // circular buffer
-			count1 = 4;
+			_buf1[0] = v0;
+			_buf1[1] = v1;
+			_buf1[2] = v2;
+			_buf1[3] = v3;
+			_buf1[4] = v0; // circular buffer
+			var count1 = 4;
 
 			// --- CLIP LEFT ------------------------------------------------------
-			count2 = 0;
-			for (i = 0; i < count1; i++)
+			var count2 = 0;
+			for (var i = 0; i < count1; i++)
 			{
-				if (buf1[i].x >= left) // p1 in
+				if (_buf1[i].x >= left) // p1 in
 				{
-					if (buf1[i + 1].x >= left) // p2 in
-						buf2[count2++] = buf1[i];
+					if (_buf1[i + 1].x >= left) // p2 in
+						_buf2[count2++] = _buf1[i];
 					else // p2 out
 					{
-						buf2[count2++] = buf1[i];
-						t = (left - buf1[i].x) / (buf1[i + 1].x - buf1[i].x);
-						buf2[count2++] = buf1[i] + t * (buf1[i + 1] - buf1[i]);
+						_buf2[count2++] = _buf1[i];
+						t = (left - _buf1[i].x) / (_buf1[i + 1].x - _buf1[i].x);
+						_buf2[count2++] = _buf1[i] + t * (_buf1[i + 1] - _buf1[i]);
 					}
 				}
 				else // p1 out
 				{
-					if (buf1[i + 1].x >= left) // p2 in
+					if (_buf1[i + 1].x >= left) // p2 in
 					{
-						t = (left - buf1[i].x) / (buf1[i + 1].x - buf1[i].x);
-						buf2[count2++] = buf1[i] + t * (buf1[i + 1] - buf1[i]);
+						t = (left - _buf1[i].x) / (_buf1[i + 1].x - _buf1[i].x);
+						_buf2[count2++] = _buf1[i] + t * (_buf1[i + 1] - _buf1[i]);
 					}
 				}
 			}
+
 			if (count2 == 0) // return if empty
 				return null;
-			buf2[count2] = buf2[0]; // close circular buffer
+			_buf2[count2] = _buf2[0]; // close circular buffer
 
 
 			// --- CLIP RIGHT ------------------------------------------------------
 			count1 = 0;
-			for (i = 0; i < count2; i++)
+			for (var i = 0; i < count2; i++)
 			{
-				if (buf2[i].x < right) // p1 in
+				if (_buf2[i].x < right) // p1 in
 				{
-					if (buf2[i + 1].x < right) // p2 in
-						buf1[count1++] = buf2[i];
+					if (_buf2[i + 1].x < right) // p2 in
+						_buf1[count1++] = _buf2[i];
 					else // p2 out
 					{
-						buf1[count1++] = buf2[i];
-						t = (right - buf2[i].x) / (buf2[i + 1].x - buf2[i].x);
-						buf1[count1++] = buf2[i] + t * (buf2[i + 1] - buf2[i]);
+						_buf1[count1++] = _buf2[i];
+						t = (right - _buf2[i].x) / (_buf2[i + 1].x - _buf2[i].x);
+						_buf1[count1++] = _buf2[i] + t * (_buf2[i + 1] - _buf2[i]);
 					}
 				}
 				else // p1 out
 				{
-					if (buf2[i + 1].x < right) // p2 in
+					if (_buf2[i + 1].x < right) // p2 in
 					{
-						t = (right - buf2[i].x) / (buf2[i + 1].x - buf2[i].x);
-						buf1[count1++] = buf2[i] + t * (buf2[i + 1] - buf2[i]);
+						t = (right - _buf2[i].x) / (_buf2[i + 1].x - _buf2[i].x);
+						_buf1[count1++] = _buf2[i] + t * (_buf2[i + 1] - _buf2[i]);
 					}
 				}
 			}
+
 			if (count1 == 0) // return if empty
 				return null;
-			buf1[count1] = buf1[0]; // close circular buffer
+			_buf1[count1] = _buf1[0]; // close circular buffer
 
 
 			// --- CLIP BOTTOM ------------------------------------------------------
 			count2 = 0;
-			for (i = 0; i < count1; i++)
+			for (var i = 0; i < count1; i++)
 			{
-				if (buf1[i].y >= bottom) // p1 in
+				if (_buf1[i].y >= bottom) // p1 in
 				{
-					if (buf1[i + 1].y >= bottom) // p2 in
-						buf2[count2++] = buf1[i];
+					if (_buf1[i + 1].y >= bottom) // p2 in
+						_buf2[count2++] = _buf1[i];
 					else // p2 out
 					{
-						buf2[count2++] = buf1[i];
-						t = (bottom - buf1[i].y) / (buf1[i + 1].y - buf1[i].y);
-						buf2[count2++] = buf1[i] + t * (buf1[i + 1] - buf1[i]);
+						_buf2[count2++] = _buf1[i];
+						t = (bottom - _buf1[i].y) / (_buf1[i + 1].y - _buf1[i].y);
+						_buf2[count2++] = _buf1[i] + t * (_buf1[i + 1] - _buf1[i]);
 					}
 				}
 				else // p1 out
 				{
-					if (buf1[i + 1].y >= bottom) // p2 in
+					if (_buf1[i + 1].y >= bottom) // p2 in
 					{
-						t = (bottom - buf1[i].y) / (buf1[i + 1].y - buf1[i].y);
-						buf2[count2++] = buf1[i] + t * (buf1[i + 1] - buf1[i]);
+						t = (bottom - _buf1[i].y) / (_buf1[i + 1].y - _buf1[i].y);
+						_buf2[count2++] = _buf1[i] + t * (_buf1[i + 1] - _buf1[i]);
 					}
 				}
 			}
+
 			if (count2 == 0) // return if empty
 				return null;
-			buf2[count2] = buf2[0]; // close circular buffer
+			_buf2[count2] = _buf2[0]; // close circular buffer
 
 
 			// --- CLIP TOP ------------------------------------------------------
 			count1 = 0;
-			for (i = 0; i < count2; i++)
+			for (var i = 0; i < count2; i++)
 			{
-				if (buf2[i].y < top) // p1 in
+				if (_buf2[i].y < top) // p1 in
 				{
-					if (buf2[i + 1].y < top) // p2 in
-						buf1[count1++] = buf2[i];
+					if (_buf2[i + 1].y < top) // p2 in
+						_buf1[count1++] = _buf2[i];
 					else // p2 out
 					{
-						buf1[count1++] = buf2[i];
-						t = (top - buf2[i].y) / (buf2[i + 1].y - buf2[i].y);
-						buf1[count1++] = buf2[i] + t * (buf2[i + 1] - buf2[i]);
+						_buf1[count1++] = _buf2[i];
+						t = (top - _buf2[i].y) / (_buf2[i + 1].y - _buf2[i].y);
+						_buf1[count1++] = _buf2[i] + t * (_buf2[i + 1] - _buf2[i]);
 					}
 				}
 				else // p1 out
 				{
-					if (buf2[i + 1].y < top) // p2 in
+					if (_buf2[i + 1].y < top) // p2 in
 					{
-						t = (top - buf2[i].y) / (buf2[i + 1].y - buf2[i].y);
-						buf1[count1++] = buf2[i] + t * (buf2[i + 1] - buf2[i]);
+						t = (top - _buf2[i].y) / (_buf2[i + 1].y - _buf2[i].y);
+						_buf1[count1++] = _buf2[i] + t * (_buf2[i + 1] - _buf2[i]);
 					}
 				}
 			}
+
 			if (count1 == 0) // return if empty
 				return null;
-			buf1[count1] = buf1[0]; // close circular buffer
+			_buf1[count1] = _buf1[0]; // close circular buffer
 
 			count = count2;
 
-			return buf1;
-
+			return _buf1;
 		}
 
 
 		// ==============================================================================
 		// CalculateBufferAreaSiz
 		// ==============================================================================
-		private float CalculateBufferAreaSize(Vector3[] buffer, int count)
+		float CalculateBufferAreaSize(Vector3[] buffer, int count)
 		{
 			// now we triangulate the clipped polygon to calculate it's total area
-			float totalArea = 0.0f;
-			Vector3 p0, p1, p2;
-			p0 = buffer[0];
-			for (int i = 0; i < count - 2; i++)
+			var totalArea = 0f;
+			for (var i = 0; i < count - 2; i++)
 			{
-				p1 = buffer[i + 2] - p0;
-				p2 = buffer[i + 1] - p0;
-				totalArea += p1.x * p2.y - p1.y * p2.x; // cross product
+				var p0 = buffer[0];
+				var p1 = buffer[i + 2] - p0;
+				var p2 = buffer[i + 1] - p0;
+				totalArea += (p1.x * p2.y - p1.y * p2.x)  / 2;
 			}
 
-			return totalArea * 0.5f; // divided by 2
-
+			return totalArea;
 		}
 
-        // ==============================================================================
-        // CalculateAdVolume
-        // ==============================================================================
-        private float CalculateAdVolume()
-        {
-            if (this.adCanvas.mediaType == VreoAdCanvas.MediaType.MOVIE)
-            {
-                AudioSource audioSource = this.adCanvas.VideoPlayer.GetTargetAudioSource(0);
+		// ==============================================================================
+		// CalculateAdVolume
+		// ==============================================================================
+		float CalculateAdVolume()
+		{
+			if (_adCanvas.mediaType == VreoAdCanvas.MediaType.PortraitVideo || _adCanvas.mediaType == VreoAdCanvas.MediaType.LandscapeVideo)
+			{
+				var audioSource = _adCanvas.VideoPlayer.GetTargetAudioSource(0);
 
-                float adVolume = 0;
-                float listenerDistance = Vector3.Distance(audioSource.transform.position, this.targetListener.transform.position);
+				var adVolume = 0f;
+				var listenerDistance = Vector3.Distance(audioSource.transform.position,
+					_targetListener.transform.position);
 
-                switch (audioSource.rolloffMode)
-                {
-                    case AudioRolloffMode.Custom:
-                        adVolume = audioSource.GetCustomCurve(AudioSourceCurveType.CustomRolloff).Evaluate(listenerDistance);
-                        break;
-                    case AudioRolloffMode.Linear:
-                        adVolume = AnimationCurve.Linear(audioSource.minDistance, 1, audioSource.maxDistance, 0).Evaluate(listenerDistance);
-                        break;
-                    case AudioRolloffMode.Logarithmic:
-                        float t = (listenerDistance - audioSource.minDistance) / (audioSource.maxDistance - audioSource.minDistance);
-                        adVolume = logerp(1, 0, t);
-                        break;
-                }
+				switch (audioSource.rolloffMode)
+				{
+					case AudioRolloffMode.Custom:
+						adVolume = audioSource.GetCustomCurve(AudioSourceCurveType.CustomRolloff)
+							.Evaluate(listenerDistance);
+						break;
+					case AudioRolloffMode.Linear:
+						adVolume = AnimationCurve.Linear(audioSource.minDistance, 1, audioSource.maxDistance, 0)
+							.Evaluate(listenerDistance);
+						break;
+					case AudioRolloffMode.Logarithmic:
+						var t = (listenerDistance - audioSource.minDistance) /
+						          (audioSource.maxDistance - audioSource.minDistance);
+						adVolume = Logerp(1, 0, t);
+						break;
+				}
 
-                adVolume *= audioSource.spatialBlend;
-                adVolume *= audioSource.volume;
+				adVolume *= audioSource.spatialBlend;
+				adVolume *= audioSource.volume;
 
-                return adVolume;
-            }
+				return adVolume;
+			}
 
-            return 0;
-        }
+			return 0;
+		}
 
-        private float logerp(float a, float b, float t)
-        {
-            return a * Mathf.Pow(b / a, t);
-        }
-
-    } // VreoMovieQuad.cs
+		float Logerp(float a, float b, float t)
+		{
+			return a * Mathf.Pow(b / a, t);
+		}
+	} // VreoMovieQuad.cs
 } // Namespace

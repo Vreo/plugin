@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor;
+﻿using UnityEditor;
 
 namespace VREO
 {
@@ -9,43 +6,47 @@ namespace VREO
 	[CanEditMultipleObjects]
 	public class VreoAdCanvasEditor : Editor
 	{
-		SerializedProperty mediaType;
-		SerializedProperty playOnAwake;
-		SerializedProperty autoPlayNew;
-		SerializedProperty initialRandomDelay;
-		SerializedProperty imageDuration;
+		SerializedProperty _mediaType;
+		SerializedProperty _playOnAwake;
+		SerializedProperty _autoPlayNew;
+		SerializedProperty _initialRandomDelay;
+		SerializedProperty _imageDuration;
+		SerializedProperty _spotId;
 
-		private void OnEnable()
+		void OnEnable()
         {
-			mediaType = serializedObject.FindProperty("mediaType");
-			playOnAwake = serializedObject.FindProperty("playOnAwake");
-			autoPlayNew = serializedObject.FindProperty("autoPlayNew");
-			initialRandomDelay = serializedObject.FindProperty("initialRandomDelay");
-			imageDuration = serializedObject.FindProperty("imageDuration");
+			_mediaType = serializedObject.FindProperty("mediaType");
+			_playOnAwake = serializedObject.FindProperty("playOnAwake");
+			_autoPlayNew = serializedObject.FindProperty("autoPlayNew");
+			_initialRandomDelay = serializedObject.FindProperty("initialRandomDelay");
+			_imageDuration = serializedObject.FindProperty("imageDuration");
+			_spotId = serializedObject.FindProperty("spotId");
         }
 
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
 
-            EditorGUILayout.PropertyField(mediaType);
+            EditorGUILayout.PropertyField(_mediaType);
+            EditorGUILayout.PropertyField(_spotId);
 
             EditorGUILayout.Space();
-            EditorGUILayout.PropertyField(playOnAwake);
-            EditorGUILayout.PropertyField(autoPlayNew);
+            EditorGUILayout.PropertyField(_playOnAwake);
+            EditorGUILayout.PropertyField(_autoPlayNew);
 
 
-            switch ((VreoAdCanvas.MediaType)mediaType.enumValueIndex)
+            switch ((VreoAdCanvas.MediaType)_mediaType.enumValueIndex)
             {
-                case VreoAdCanvas.MediaType.IMAGE:
-                case VreoAdCanvas.MediaType.BANNER:
-                case VreoAdCanvas.MediaType.LOGO_SQUARE:
-                case VreoAdCanvas.MediaType.LOGO_WIDE:
-                    EditorGUILayout.PropertyField(imageDuration);
+	            case VreoAdCanvas.MediaType.MediumRectangle:
+	            case VreoAdCanvas.MediaType.LargeRectangle:
+	            case VreoAdCanvas.MediaType.WideSkyscraper:
+	            case VreoAdCanvas.MediaType.Leaderboard:
+                    EditorGUILayout.PropertyField(_imageDuration);
                     break;
 
-                case VreoAdCanvas.MediaType.MOVIE:
-                    EditorGUILayout.PropertyField(initialRandomDelay);
+                case VreoAdCanvas.MediaType.PortraitVideo:
+                case VreoAdCanvas.MediaType.LandscapeVideo:
+                    EditorGUILayout.PropertyField(_initialRandomDelay);
                     break;
 
             }
