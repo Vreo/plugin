@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using UnityEngine;
 
 namespace VREO
 {
@@ -12,7 +13,9 @@ namespace VREO
 		SerializedProperty _initialRandomDelay;
 		SerializedProperty _imageDuration;
 		SerializedProperty _spotId;
-
+		
+		SerializedProperty _isRegistered;
+		
 		void OnEnable()
         {
 			_mediaType = serializedObject.FindProperty("mediaType");
@@ -21,6 +24,17 @@ namespace VREO
 			_initialRandomDelay = serializedObject.FindProperty("initialRandomDelay");
 			_imageDuration = serializedObject.FindProperty("imageDuration");
 			_spotId = serializedObject.FindProperty("spotId");
+
+			_isRegistered = serializedObject.FindProperty("isRegistered");
+
+			if (!_isRegistered.boolValue)
+			{
+				var registerPopup = EditorWindow.GetWindow<VreoAdCanvasSettingsPopup>("Register Ad spot");
+				registerPopup.maxSize = new Vector2(400, 85);
+				registerPopup.minSize = registerPopup.maxSize;
+				registerPopup.serializedObject = serializedObject;
+				registerPopup.ShowPopup();
+			}
         }
 
         public override void OnInspectorGUI()

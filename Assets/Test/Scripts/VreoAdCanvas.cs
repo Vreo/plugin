@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.IO;
+using UnityEngine.Serialization;
 using UnityEngine.Video;
 
 namespace VREO
@@ -45,7 +46,9 @@ namespace VREO
 		public float imageDuration = 10.0f;
 
 		public string spotId;
-
+		
+		public bool isRegistered = false;
+		
 		// ==============================================================================
 
 		bool _initialized;
@@ -479,7 +482,7 @@ namespace VREO
 		// Pauses video playback when the app loses or gains focus
 		void OnApplicationPause(bool wasPaused)
 		{
-			Debug.Log("OnApplicationPause: " + wasPaused);
+			//Debug.Log("OnApplicationPause: " + wasPaused);
 			if (VideoPlayer != null)
 			{
 				_videoPaused = wasPaused;
