@@ -27,7 +27,7 @@ namespace VREO
 
 			_isRegistered = serializedObject.FindProperty("isRegistered");
 
-			if (!_isRegistered.boolValue)
+			if (!Application.isPlaying && !_isRegistered.boolValue)
 			{
 				var registerPopup = EditorWindow.GetWindow<VreoAdCanvasSettingsPopup>("Register Ad spot");
 				registerPopup.maxSize = new Vector2(400, 85);

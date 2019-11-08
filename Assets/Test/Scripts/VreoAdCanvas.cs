@@ -1,12 +1,13 @@
 using UnityEngine;
 using System.Collections;
 using System.IO;
-using UnityEngine.Serialization;
 using UnityEngine.Video;
+using Random = UnityEngine.Random;
 
 namespace VREO
 {
 	[RequireComponent(typeof(VideoPlayer))]
+	[ExecuteInEditMode] 
 	public class VreoAdCanvas : MonoBehaviour
 	{
 		const float SendViewDataTime = 600.0f;
@@ -142,6 +143,9 @@ namespace VREO
 
 		void Awake()
 		{
+			if (!Application.isPlaying)
+				return;
+			
 			if (!_initialized)
 			{
 				_sendViewDataTimer -= Random.Range(1, 20);
@@ -168,6 +172,9 @@ namespace VREO
 
 		void OnEnable()
 		{
+			if (!Application.isPlaying)
+				return;
+			
 			if (playOnAwake)
 				ShowAd(true);
 		}
@@ -425,6 +432,9 @@ namespace VREO
 
 		void Update()
 		{
+			if (!Application.isPlaying)
+				return;
+			
 			MovieQuad.Update();
 
 			// send view data intermittently
@@ -491,6 +501,14 @@ namespace VREO
 				else if (VideoPlayer.isPrepared)
 					VideoPlayer.Play();
 			}
+		}
+
+		private void OnDisable()
+		{
+			if (Application.isPlaying)
+				return;
+			
+			VreoCommunicate.RequestRegisterAd(spotId);
 		}
 	} // VreoMoviePlayer.cs
 } // Namespace

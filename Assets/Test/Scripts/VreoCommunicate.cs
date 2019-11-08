@@ -5,8 +5,22 @@ using UnityEngine.Networking;
 
 
 namespace VREO
-{   
-    [Serializable]
+{
+	[Serializable]
+	public class RegisterAdRequest
+	{
+		public string ID_Spot;
+		public int ID_Game;
+		public int ID_GameDev;
+	}
+
+	[Serializable]
+	public class UnregisterAdRequest
+	{
+		public string ID_Spot;
+	}
+
+	[Serializable]
 	public class AdRequest
 	{
 		public int ID_GameDev;
@@ -89,6 +103,7 @@ namespace VREO
 
 		// ==============================================================================
 
+		const string RequestRegisterAdUrl = "http://api.vreo.io/ad/spot";
 		const string RequestRandomAdUrl = "http://api.vreo.io/ad/request";
 		const string SendViewDataUrl = "http://api.vreo.io/ad/views";
 
@@ -105,6 +120,50 @@ namespace VREO
 		}
 
 		public delegate void RandomAdRequestCallback(VreoResponse response);
+
+		public static void RequestRegisterAd(string spotId)
+		{
+			var registerAdRequest = new RegisterAdRequest
+			{
+				ID_GameDev = Instance.developerId,
+				ID_Game = Instance.developerGameId,
+				ID_Spot = spotId,
+			};
+            
+			var jsonString = JsonUtility.ToJson(registerAdRequest);
+
+			var pData = System.Text.Encoding.ASCII.GetBytes(jsonString.ToCharArray());
+
+			var request = new UnityWebRequest(RequestRegisterAdUrl, "POST")
+			{
+				uploadHandler = new UploadHandlerRaw(pData), downloadHandler = new DownloadHandlerBuffer()
+			};
+			request.SetRequestHeader("Content-Type", "application/json");
+			request.SetRequestHeader("Authorization", Instance.developerAccessToken);
+			
+			EditorWebRequestHelper.Instance.SendRequest(request, () => print($"Ad spot {spotId} was registered."), (s) => print(s));
+		}
+
+		public static void RequestUnregisterAd(string spotId)
+		{
+			var unregisterAdRequest = new UnregisterAdRequest
+			{
+				ID_Spot = spotId,
+			};
+            
+			var jsonString = JsonUtility.ToJson(unregisterAdRequest);
+
+			var pData = System.Text.Encoding.ASCII.GetBytes(jsonString.ToCharArray());
+
+			var request = new UnityWebRequest(RequestRegisterAdUrl, "DELETE")
+			{
+				uploadHandler = new UploadHandlerRaw(pData), downloadHandler = new DownloadHandlerBuffer()
+			};
+			request.SetRequestHeader("Content-Type", "application/json");
+			request.SetRequestHeader("Authorization", Instance.developerAccessToken);
+			
+			EditorWebRequestHelper.Instance.SendRequest(request, () => print($"Ad spot {spotId} was unregistered."), (s) => print(s));
+		}
 
         // ==============================================================================
         // RequestAdvertisingIdentifier
