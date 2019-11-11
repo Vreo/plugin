@@ -502,13 +502,5 @@ namespace VREO
 					VideoPlayer.Play();
 			}
 		}
-
-		private void OnDisable()
-		{
-			if (Application.isPlaying)
-				return;
-			
-			VreoCommunicate.RequestRegisterAd(spotId);
-		}
 	} // VreoMoviePlayer.cs
 } // Namespace

@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using System.Collections;
+using UnityEngine.Experimental.PlayerLoop;
 using UnityEngine.Networking;
 
 
@@ -121,7 +122,7 @@ namespace VREO
 
 		public delegate void RandomAdRequestCallback(VreoResponse response);
 
-		public static void RequestRegisterAd(string spotId)
+		public static void RequestRegisterAd(string spotId, Action onComplete, Action<string> onError)
 		{
 			var registerAdRequest = new RegisterAdRequest
 			{
@@ -140,11 +141,11 @@ namespace VREO
 			};
 			request.SetRequestHeader("Content-Type", "application/json");
 			request.SetRequestHeader("Authorization", Instance.developerAccessToken);
-			
-			EditorWebRequestHelper.Instance.SendRequest(request, () => print($"Ad spot {spotId} was registered."), (s) => print(s));
+
+			EditorWebRequestHelper.Instance.SendRequest(request, onComplete, onError);
 		}
 
-		public static void RequestUnregisterAd(string spotId)
+		public static void RequestUnregisterAd(string spotId, Action onComplete, Action<string> onError)
 		{
 			var unregisterAdRequest = new UnregisterAdRequest
 			{
@@ -162,7 +163,7 @@ namespace VREO
 			request.SetRequestHeader("Content-Type", "application/json");
 			request.SetRequestHeader("Authorization", Instance.developerAccessToken);
 			
-			EditorWebRequestHelper.Instance.SendRequest(request, () => print($"Ad spot {spotId} was unregistered."), (s) => print(s));
+			EditorWebRequestHelper.Instance.SendRequest(request, onComplete, onError);
 		}
 
         // ==============================================================================

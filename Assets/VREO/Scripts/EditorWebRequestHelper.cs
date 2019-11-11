@@ -69,6 +69,11 @@ public class EditorWebRequestHelper : MonoBehaviour
             _coroutines.RemoveAll(c => c.isDone);
         }
     }
+    
+    public void UpdateExternal()
+    {
+        Update();
+    }
 
     public void SendRequest(UnityWebRequest request, Action onComplete, Action<string> onError)
     {

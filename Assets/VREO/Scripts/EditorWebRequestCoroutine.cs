@@ -30,7 +30,8 @@ public class EditorWebRequestCoroutine
 
         if (request.isNetworkError || request.isHttpError)
         {
-            onError.Invoke(request.error);
+            Debug.Log(request.error);
+            onError?.Invoke(request.error);
         }
         else
         {

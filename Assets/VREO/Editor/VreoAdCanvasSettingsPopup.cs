@@ -7,6 +7,13 @@ using VREO;
 
 public class VreoAdCanvasSettingsPopup : EditorWindow
 {
+    enum RegistrationState
+    {
+        eNone,
+        eError,
+        eDone
+    }
+    
     static void Init()
     {
         VreoAdCanvasSettingsPopup window = ScriptableObject.CreateInstance<VreoAdCanvasSettingsPopup>();
@@ -36,6 +43,8 @@ public class VreoAdCanvasSettingsPopup : EditorWindow
     }
 
     private string SpotId;
+    private string Error;
+    private RegistrationState Registration;
 
     public SerializedObject serializedObject;
     
@@ -62,6 +71,30 @@ public class VreoAdCanvasSettingsPopup : EditorWindow
         
         if (GUILayout.Button("Register Ad Spot"))
         {
+            VreoCommunicate.RequestRegisterAd(SpotId, () =>
+            {
+                Debug.Log($"Ad spot with ID {SpotId} was registered.");
+                Registration = RegistrationState.eDone;
+            }, error =>
+            {
+                Debug.Log($"An error occured while registering ad spot with ID {SpotId}. Error: {error}");
+                Registration = RegistrationState.eError;
+                Error = error;
+                Repaint();
+            });
+        }
+        
+        EditorGUI.EndDisabledGroup();
+
+        if (Registration == RegistrationState.eError)
+        {
+            GUILayout.Space(5);
+                
+            EditorGUILayout.LabelField($"An error occured while registering ad spot with ID {SpotId}. Error: {Error}", EditorStyles.wordWrappedLabel);
+        }
+
+        if (Registration == RegistrationState.eDone)
+        {
             var spotId = serializedObject.FindProperty("spotId");
             var isRegistered = serializedObject.FindProperty("isRegistered");
             
@@ -69,10 +102,13 @@ public class VreoAdCanvasSettingsPopup : EditorWindow
             isRegistered.boolValue = true;
 
             serializedObject.ApplyModifiedProperties();
-
+            
             Close();
         }
-        
-        EditorGUI.EndDisabledGroup();
+    }
+
+    private void Update()
+    {
+        EditorWebRequestHelper.Instance.UpdateExternal();
     }
 }
