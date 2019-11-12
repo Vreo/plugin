@@ -13,7 +13,7 @@ public class VreoAdCanvasSettingsPopup : EditorWindow
         eError,
         eDone
     }
-    
+
     static void Init()
     {
         VreoAdCanvasSettingsPopup window = ScriptableObject.CreateInstance<VreoAdCanvasSettingsPopup>();
@@ -31,7 +31,7 @@ public class VreoAdCanvasSettingsPopup : EditorWindow
             Close();
             return null;
         }
-        
+
         var adCanvasComp = adCanvas.GetComponent<VreoAdCanvas>();
         if (!adCanvasComp)
         {
@@ -47,28 +47,36 @@ public class VreoAdCanvasSettingsPopup : EditorWindow
     private RegistrationState Registration;
 
     public SerializedObject serializedObject;
-    
+
     private void OnSelectionChange()
     {
         var adCanvas = GetSelectedAdCanvas();
-        if (adCanvas && adCanvas.isRegistered)
+        if (adCanvas)
         {
-            Close();
+            SpotId = string.Empty;
+            Error = string.Empty;
+            Registration = RegistrationState.eNone;
+            
+            if (adCanvas.isRegistered)
+            {
+                Close();
+            }
         }
     }
 
     void OnGUI()
     {
-        EditorGUILayout.LabelField("Register newly created VREO_AD_CANVAS object by setting its unique Spot Id:", EditorStyles.wordWrappedLabel);
-        
+        EditorGUILayout.LabelField("Register newly created VREO_AD_CANVAS object by setting its unique Spot Id:",
+            EditorStyles.wordWrappedLabel);
+
         GUILayout.Space(5);
 
         SpotId = EditorGUILayout.TextField("Spot Id: ", SpotId);
-        
+
         GUILayout.Space(5);
-        
+
         EditorGUI.BeginDisabledGroup(string.IsNullOrEmpty(SpotId));
-        
+
         if (GUILayout.Button("Register Ad Spot"))
         {
             VreoCommunicate.RequestRegisterAd(SpotId, () =>
@@ -83,13 +91,13 @@ public class VreoAdCanvasSettingsPopup : EditorWindow
                 Repaint();
             });
         }
-        
+
         EditorGUI.EndDisabledGroup();
 
         if (Registration == RegistrationState.eError)
         {
             GUILayout.Space(5);
-                
+
             EditorGUILayout.LabelField($"An error occured while registering ad spot with ID {SpotId}. Error: {Error}", EditorStyles.wordWrappedLabel);
         }
 
@@ -97,18 +105,19 @@ public class VreoAdCanvasSettingsPopup : EditorWindow
         {
             var spotId = serializedObject.FindProperty("spotId");
             var isRegistered = serializedObject.FindProperty("isRegistered");
-            
+
             spotId.stringValue = SpotId;
             isRegistered.boolValue = true;
 
             serializedObject.ApplyModifiedProperties();
-            
+
             Close();
         }
     }
 
-    private void Update()
+    void Update()
     {
+        // in order to keep editor "coroutines" alive EditorWebRequestHelper should be manually updated every frame
         EditorWebRequestHelper.Instance.UpdateExternal();
     }
 }
