@@ -104,7 +104,7 @@ namespace VREO
 
 		// ==============================================================================
 
-		const string RequestRegisterAdUrl = "http://api.vreo.io/ad/spot";
+		const string RequestRegisterAdUrl = "http://api.vreo.io/spot";
 		const string RequestRandomAdUrl = "http://api.vreo.io/ad/request";
 		const string SendViewDataUrl = "http://api.vreo.io/ad/views";
 
