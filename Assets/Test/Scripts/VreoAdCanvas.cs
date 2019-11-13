@@ -46,6 +46,8 @@ namespace VREO
 
 		public string spotId;
 
+		public float proximity = 3.0f;
+
 		// ==============================================================================
 
 		bool _initialized;
