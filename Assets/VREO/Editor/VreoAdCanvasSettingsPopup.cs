@@ -62,6 +62,10 @@ public class VreoAdCanvasSettingsPopup : EditorWindow
                 Close();
             }
         }
+        else
+        {
+            Close();
+        }
     }
 
     void OnGUI()
