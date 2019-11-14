@@ -58,9 +58,7 @@ public class VreoAdCanvasSettingsPopup : EditorWindow
             Registration = RegistrationState.eNone;
             
             if (adCanvas.isRegistered)
-            {
                 Close();
-            }
         }
         else
         {
@@ -70,6 +68,9 @@ public class VreoAdCanvasSettingsPopup : EditorWindow
 
     void OnGUI()
     {
+        if (GetSelectedAdCanvas() == null)
+            Close();
+
         EditorGUILayout.LabelField("Register newly created VREO_AD_CANVAS object by setting its unique Spot Id:",
             EditorStyles.wordWrappedLabel);
 
@@ -89,7 +90,7 @@ public class VreoAdCanvasSettingsPopup : EditorWindow
                 Registration = RegistrationState.eDone;
             }, error =>
             {
-                Debug.Log($"An error occured while registering ad spot with ID {SpotId}. Error: {error}");
+                Debug.LogError($"An error occured while registering ad spot with ID {SpotId}. Error: {error}");
                 Registration = RegistrationState.eError;
                 Error = error;
                 Repaint();

@@ -43,6 +43,21 @@ namespace VREO
 
             EditorGUILayout.PropertyField(_mediaType);
             EditorGUILayout.PropertyField(_spotId);
+            
+            EditorGUI.BeginDisabledGroup(string.IsNullOrEmpty(_spotId.stringValue) || !_isRegistered.boolValue);
+            
+            if(GUILayout.Button("Unregister Ad Spot"))
+            {
+	            VreoCommunicate.RequestUnregisterAd(_spotId.stringValue, () =>
+	            {
+		            Debug.Log($"Ad spot with ID {_spotId.stringValue} was unregistered.");
+	            }, error =>
+	            {
+		            Debug.LogError($"An error occured while registering ad spot with ID {_spotId.stringValue}. Error: {error}");
+	            });
+            }
+            
+            EditorGUI.EndDisabledGroup();
 
             EditorGUILayout.Space();
             EditorGUILayout.PropertyField(_playOnAwake);
