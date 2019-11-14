@@ -117,7 +117,7 @@ namespace VREO
 				var count = 0;
 				var buffer = ClipPolygon(worldCoord0, worldCoord1, worldCoord2, worldCoord3, _targetCamera.pixelRect,
 					ref count);
-				if (buffer != null)
+				if (buffer != null && IsMovieQuadVisible())
 				{
 					// calculate the 2d area of the remaining quad
 					area = CalculateBufferAreaSize(buffer, count);
@@ -178,6 +178,17 @@ namespace VREO
 			}
 
 			_systemTime += Time.deltaTime;
+		}
+		
+		// ==============================================================================
+
+		bool IsMovieQuadVisible()
+		{
+			Plane[] planes = GeometryUtility.CalculateFrustumPlanes(_targetCamera);
+			if (GeometryUtility.TestPlanesAABB(planes , _adCanvas.GetComponent<Collider>().bounds))
+				return true;
+
+			return false;
 		}
 
 		// ==============================================================================
