@@ -29,6 +29,13 @@ namespace VREO
 
 		Vector3[] _buf1 = new Vector3[16]; // just temporary buffers, big enough for handling all cases
 		Vector3[] _buf2 = new Vector3[16];
+		
+		private float _screenPercentage;
+		public float ScreenPercentage
+		{
+			get { return _screenPercentage; }
+			private set { _screenPercentage = value; }
+		}
 
 		// ==============================================================================
 
@@ -96,6 +103,8 @@ namespace VREO
 			var blockedAreaPercent = 0f;
 			var area = 0f;
 			var percentualArea = 0f;
+			
+			ScreenPercentage = 0.0f;
 
 			// ignore 1st frame, cause of initialization
 			if (_systemTime > 0f)
@@ -128,14 +137,24 @@ namespace VREO
 						var blockedCount = 0;
 						for (var i = 0; i < _numOccluderQueries; i++)
 						{
-							if (Physics.Linecast(_targetCamera.transform.position,
-								_adCanvas.transform.TransformPoint(_occluderQueriesCoords[i])))
+							RaycastHit hit;
+							
+							if (Physics.Linecast(_targetCamera.transform.position, _adCanvas.transform.TransformPoint(_occluderQueriesCoords[i]), out hit))
 							{
-								blockedCount++;
+								if (hit.transform.gameObject.GetComponent<VreoAdCanvas>() != _adCanvas)
+								{
+									blockedCount++;
 #if UNITY_EDITOR
-								if (debugLinesEnabled)
-									Debug.DrawLine(_targetCamera.transform.position,
-										_adCanvas.transform.TransformPoint(_occluderQueriesCoords[i]), Color.red);
+									if (debugLinesEnabled)
+										Debug.DrawLine(_targetCamera.transform.position,
+											_adCanvas.transform.TransformPoint(_occluderQueriesCoords[i]), Color.red);
+								}
+								else
+								{
+									if (debugLinesEnabled)
+										Debug.DrawLine(_targetCamera.transform.position,
+											_adCanvas.transform.TransformPoint(_occluderQueriesCoords[i]), Color.green);
+								}
 #endif
 							}
 #if UNITY_EDITOR
@@ -152,7 +171,10 @@ namespace VREO
 
 						var screenPercentage = area * (100.0f - blockedAreaPercent);
 						screenPercentage /= _targetCamera.pixelRect.width * _targetCamera.pixelRect.height;
-						_avgScreenPercent = (_avgScreenPercent * _systemViewTime + screenPercentage * Time.deltaTime) /
+
+						ScreenPercentage = screenPercentage;
+
+						_avgScreenPercent = (_avgScreenPercent * _systemViewTime + ScreenPercentage * Time.deltaTime) /
 						                    (_systemViewTime + Time.deltaTime);
 
 						// averaging screen position
