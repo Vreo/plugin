@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using UnityEngine;
 
 namespace VREO
 {
@@ -12,7 +13,9 @@ namespace VREO
 		SerializedProperty _initialRandomDelay;
 		SerializedProperty _imageDuration;
 		SerializedProperty _spotId;
-
+		
+		SerializedProperty _isRegistered;
+		
 		void OnEnable()
         {
 			_mediaType = serializedObject.FindProperty("mediaType");
@@ -21,6 +24,17 @@ namespace VREO
 			_initialRandomDelay = serializedObject.FindProperty("initialRandomDelay");
 			_imageDuration = serializedObject.FindProperty("imageDuration");
 			_spotId = serializedObject.FindProperty("spotId");
+
+			_isRegistered = serializedObject.FindProperty("isRegistered");
+
+			if (!Application.isPlaying && !_isRegistered.boolValue)
+			{
+				var registerPopup = EditorWindow.GetWindow<VreoAdCanvasSettingsPopup>("Register Ad spot");
+				registerPopup.maxSize = new Vector2(400, 115);
+				registerPopup.minSize = registerPopup.maxSize;
+				registerPopup.serializedObject = serializedObject;
+				registerPopup.ShowPopup();
+			}
         }
 
         public override void OnInspectorGUI()
@@ -29,6 +43,21 @@ namespace VREO
 
             EditorGUILayout.PropertyField(_mediaType);
             EditorGUILayout.PropertyField(_spotId);
+            
+            EditorGUI.BeginDisabledGroup(string.IsNullOrEmpty(_spotId.stringValue) || !_isRegistered.boolValue);
+            
+            if(GUILayout.Button("Unregister Ad Spot"))
+            {
+	            VreoCommunicate.RequestUnregisterAd(_spotId.stringValue, () =>
+	            {
+		            Debug.Log($"Ad spot with ID {_spotId.stringValue} was unregistered.");
+	            }, error =>
+	            {
+		            Debug.LogError($"An error occured while registering ad spot with ID {_spotId.stringValue}. Error: {error}");
+	            });
+            }
+            
+            EditorGUI.EndDisabledGroup();
 
             EditorGUILayout.Space();
             EditorGUILayout.PropertyField(_playOnAwake);
