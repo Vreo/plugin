@@ -13,6 +13,8 @@ namespace VREO
 		SerializedProperty _initialRandomDelay;
 		SerializedProperty _imageDuration;
 		SerializedProperty _spotId;
+
+		SerializedProperty _proximity;
 		
 		SerializedProperty _isRegistered;
 		
@@ -24,7 +26,7 @@ namespace VREO
 			_initialRandomDelay = serializedObject.FindProperty("initialRandomDelay");
 			_imageDuration = serializedObject.FindProperty("imageDuration");
 			_spotId = serializedObject.FindProperty("spotId");
-
+			_proximity = serializedObject.FindProperty("proximity");
 			_isRegistered = serializedObject.FindProperty("isRegistered");
 
 			if (!Application.isPlaying && !_isRegistered.boolValue)
@@ -79,6 +81,8 @@ namespace VREO
                     break;
 
             }
+
+            EditorGUILayout.Slider(_proximity, 0.0f, 100.0f);
 
 			serializedObject.ApplyModifiedProperties();
 		}

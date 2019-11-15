@@ -47,6 +47,8 @@ namespace VREO
 		public float imageDuration = 10.0f;
 
 		public string spotId;
+
+		public float proximity = 3.0f;
 		
 		public bool isRegistered = false;
 		
@@ -229,12 +231,12 @@ namespace VREO
 
 		void VideoPlayer_PrepareCompleted(VideoPlayer source)
 		{
-			if (source.isPrepared)
+			if (source.isPrepared )
 			{
 				_playingTime = 0;
 				_loadingState = MediaLoadingState.Succeeded;
 
-				if (initialRandomDelay <= 0)
+				if ((initialRandomDelay <= 0) && (MovieQuad.ScreenPercentage > proximity))
 				{
 					VideoPlayer.Play();
 				}
@@ -486,6 +488,13 @@ namespace VREO
 					if (initialRandomDelay <= 0)
 						VideoPlayer_PrepareCompleted(VideoPlayer);
 				}
+				else
+				{
+					if (MovieQuad.ScreenPercentage > proximity)
+					{
+						VideoPlayer_PrepareCompleted(VideoPlayer);
+					}
+				}
 			}
 		}
 
@@ -498,7 +507,7 @@ namespace VREO
 				_videoPaused = wasPaused;
 				if (_videoPaused && VideoPlayer.isPlaying)
 					VideoPlayer.Pause();
-				else if (VideoPlayer.isPrepared)
+				else if (VideoPlayer.isPrepared && (MovieQuad.ScreenPercentage > proximity))
 					VideoPlayer.Play();
 			}
 		}
