@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.4482453, g: 0.49827296, b: 0.5755825, a: 1}
+  m_IndirectSpecularColor: {r: 0.44824505, g: 0.49827266, b: 0.57558197, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -386,6 +386,11 @@ PrefabInstance:
       propertyPath: m_RootOrder
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 114454437150799406, guid: 38bf2c707e49d471c8601109c667bba0,
+        type: 3}
+      propertyPath: enableGeotargeting
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 38bf2c707e49d471c8601109c667bba0, type: 3}
 --- !u!1001 &413596508
@@ -704,87 +709,3 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 4227998244050950, guid: 52bc9497cc29145e78aa1f44b5b12fd2, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -1.07
-      objectReference: {fileID: 0}
-    - target: {fileID: 4227998244050950, guid: 52bc9497cc29145e78aa1f44b5b12fd2, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.14
-      objectReference: {fileID: 0}
-    - target: {fileID: 4227998244050950, guid: 52bc9497cc29145e78aa1f44b5b12fd2, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0.513
-      objectReference: {fileID: 0}
-    - target: {fileID: 4227998244050950, guid: 52bc9497cc29145e78aa1f44b5b12fd2, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0.03593595
-      objectReference: {fileID: 0}
-    - target: {fileID: 4227998244050950, guid: 52bc9497cc29145e78aa1f44b5b12fd2, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0.12736711
-      objectReference: {fileID: 0}
-    - target: {fileID: 4227998244050950, guid: 52bc9497cc29145e78aa1f44b5b12fd2, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0.025205696
-      objectReference: {fileID: 0}
-    - target: {fileID: 4227998244050950, guid: 52bc9497cc29145e78aa1f44b5b12fd2, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.99088395
-      objectReference: {fileID: 0}
-    - target: {fileID: 4227998244050950, guid: 52bc9497cc29145e78aa1f44b5b12fd2, type: 3}
-      propertyPath: m_RootOrder
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 4227998244050950, guid: 52bc9497cc29145e78aa1f44b5b12fd2, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 4.453
-      objectReference: {fileID: 0}
-    - target: {fileID: 4227998244050950, guid: 52bc9497cc29145e78aa1f44b5b12fd2, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: -14.558001
-      objectReference: {fileID: 0}
-    - target: {fileID: 4227998244050950, guid: 52bc9497cc29145e78aa1f44b5b12fd2, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 2.345
-      objectReference: {fileID: 0}
-    - target: {fileID: 4227998244050950, guid: 52bc9497cc29145e78aa1f44b5b12fd2, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1.7572912
-      objectReference: {fileID: 0}
-    - target: {fileID: 4227998244050950, guid: 52bc9497cc29145e78aa1f44b5b12fd2, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1.0205752
-      objectReference: {fileID: 0}
-    - target: {fileID: 4227998244050950, guid: 52bc9497cc29145e78aa1f44b5b12fd2, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1.1839349
-      objectReference: {fileID: 0}
-    - target: {fileID: 114934620560324512, guid: 52bc9497cc29145e78aa1f44b5b12fd2,
-        type: 3}
-      propertyPath: mediaType
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 82235941298377904, guid: 52bc9497cc29145e78aa1f44b5b12fd2,
-        type: 3}
-      propertyPath: rolloffMode
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 82235941298377904, guid: 52bc9497cc29145e78aa1f44b5b12fd2,
-        type: 3}
-      propertyPath: MaxDistance
-      value: 15
-      objectReference: {fileID: 0}
-    - target: {fileID: 82235941298377904, guid: 52bc9497cc29145e78aa1f44b5b12fd2,
-        type: 3}
-      propertyPath: panLevelCustomCurve.m_Curve.Array.data[0].value
-      value: 1
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 52bc9497cc29145e78aa1f44b5b12fd2, type: 3}

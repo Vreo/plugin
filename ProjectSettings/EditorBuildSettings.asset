@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/VREO/Scenes/Example.unity
+    guid: 49f752354bb57464fb520d16b97fc910
   m_configObjects: {}

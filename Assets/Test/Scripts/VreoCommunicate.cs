@@ -1,9 +1,7 @@
 using System;
 using UnityEngine;
 using System.Collections;
-using UnityEngine.Experimental.PlayerLoop;
 using UnityEngine.Networking;
-
 
 namespace VREO
 {
@@ -91,6 +89,9 @@ namespace VREO
 
 		[SerializeField]
 		string developerAccessToken;
+
+		[SerializeField]
+		bool enableGeotargeting;
 		
 		string _advertiserId = "";
 		bool _advertiserIdSupportEnabled = true;
@@ -114,7 +115,15 @@ namespace VREO
 			get
 			{
 				if (_instance == null)
+				{
 					_instance = FindObjectOfType<VreoCommunicate>();
+					
+					// if geotargeting is enabled try to obtain location data when referencing VreoCommunicate for the first time
+					if (_instance != null && _instance.enableGeotargeting)
+					{
+						LocationServiceHelper.Instance.ObtainLocationData();
+					}
+				}
 
 				return _instance;
 			}
@@ -212,6 +221,12 @@ namespace VREO
 				str_Device = DeviceId,
 				dat_Timestamp = GetTimestampString()
             };
+
+            if (LocationServiceHelper.Instance.LocationReceived)
+            {
+	            randomAdRequest.dec_Latitude = LocationServiceHelper.Instance.LastLocation.latitude;
+	            randomAdRequest.dec_Longitude = LocationServiceHelper.Instance.LastLocation.longitude;
+            }
             
 			var jsonString = JsonUtility.ToJson(randomAdRequest);
 
