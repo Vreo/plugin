@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System.Runtime.InteropServices;
+using UnityEditor;
 using UnityEngine;
 
 namespace VREO
@@ -43,7 +44,17 @@ namespace VREO
         {
             serializedObject.Update();
 
+            EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(_mediaType);
+            if (EditorGUI.EndChangeCheck())
+            {
+	            var adCanvas = GetSelectedAdCanvas();
+	            if (adCanvas != null)
+	            {
+		            adCanvas.OnMediaTypeChanged((VreoAdCanvas.MediaType)_mediaType.enumValueIndex);
+	            }
+            }
+            
             EditorGUILayout.PropertyField(_spotId);
             
             EditorGUI.BeginDisabledGroup(string.IsNullOrEmpty(_spotId.stringValue) || !_isRegistered.boolValue);
@@ -79,12 +90,24 @@ namespace VREO
                 case VreoAdCanvas.MediaType.LandscapeVideo:
                     EditorGUILayout.PropertyField(_initialRandomDelay);
                     break;
-
             }
 
             EditorGUILayout.Slider(_proximity, 0.0f, 100.0f);
 
 			serializedObject.ApplyModifiedProperties();
 		}
+        
+        VreoAdCanvas GetSelectedAdCanvas()
+        {
+	        var adCanvas = Selection.activeGameObject;
+	        if (!adCanvas)
+		        return null;
+
+	        var adCanvasComp = adCanvas.GetComponent<VreoAdCanvas>();
+	        if (!adCanvasComp)
+				return null;
+
+	        return adCanvasComp;
+        }
 	}
 }

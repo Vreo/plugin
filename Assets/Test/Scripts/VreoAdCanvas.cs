@@ -11,6 +11,7 @@ namespace VREO
 	public class VreoAdCanvas : MonoBehaviour
 	{
 		const float SendViewDataTime = 600.0f;
+		const int BaseSideLength = 300;
 
 		public enum MediaLoadingState
 		{
@@ -432,11 +433,18 @@ namespace VREO
 
 		// ==============================================================================
 
+		public void OnMediaTypeChanged(MediaType type)
+		{
+			var desiredSize = SizeForResolutionType(type);
+			var newScale = new Vector3((float) desiredSize.x / BaseSideLength, (float) desiredSize.y / BaseSideLength, 1.0f);
+			transform.localScale = newScale;
+		}
+		
 		void Update()
 		{
 			if (!Application.isPlaying)
 				return;
-			
+
 			MovieQuad.Update();
 
 			// send view data intermittently
