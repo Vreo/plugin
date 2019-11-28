@@ -104,9 +104,9 @@ namespace VREO
 
 		// ==============================================================================
 
-		const string RequestRegisterAdUrl = "http://api.vreo.io/spot";
-		const string RequestRandomAdUrl = "http://api.vreo.io/ad/request";
-		const string SendViewDataUrl = "http://api.vreo.io/ad/views";
+		const string RequestRegisterAdUrl = "https://vreo-api.herokuapp.com/spot";
+		const string RequestRandomAdUrl = "https://vreo-api.herokuapp.com/ad/request";
+		const string SendViewDataUrl = "https://vreo-api.herokuapp.com/ad/views";
 
 		static VreoCommunicate _instance;
 		static VreoCommunicate Instance

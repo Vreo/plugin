@@ -17,7 +17,9 @@ namespace VREO
 		SerializedProperty _spotId;
 
 		SerializedProperty _proximity;
-		
+
+		SerializedProperty _isClickable;
+
 		SerializedProperty _isRegistered;
 		
 		void OnEnable()
@@ -29,12 +31,12 @@ namespace VREO
 			_imageDuration = serializedObject.FindProperty("imageDuration");
 			_spotId = serializedObject.FindProperty("spotId");
 			_proximity = serializedObject.FindProperty("proximity");
+			_isClickable = serializedObject.FindProperty("isClickable");
 			_isRegistered = serializedObject.FindProperty("isRegistered");
+			
 
 			if (!Application.isPlaying && !_isRegistered.boolValue && !IsPrefabMode())
 			{
-
-				
 				var registerPopup = EditorWindow.GetWindow<VreoAdCanvasSettingsPopup>("Register Ad spot");
 				registerPopup.maxSize = new Vector2(400, 115);
 				registerPopup.minSize = registerPopup.maxSize;
@@ -81,7 +83,7 @@ namespace VREO
             EditorGUILayout.Space();
             EditorGUILayout.PropertyField(_playOnAwake);
             EditorGUILayout.PropertyField(_autoPlayNew);
-
+            EditorGUILayout.PropertyField(_isClickable);
 
             switch ((VreoAdCanvas.MediaType)_mediaType.enumValueIndex)
             {

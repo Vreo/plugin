@@ -56,6 +56,7 @@ MonoBehaviour:
   imageDuration: 10
   spotId: 
   proximity: 3
+  isRegistered: 0
 --- !u!33 &33118991244856266
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -239,9 +240,9 @@ MeshCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1998396588181932}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 3
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 14
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
