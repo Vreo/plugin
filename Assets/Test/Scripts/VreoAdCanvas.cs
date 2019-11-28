@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using System.Collections;
 using System.IO;
@@ -50,6 +51,8 @@ namespace VREO
 		public string spotId;
 
 		public float proximity = 3.0f;
+
+		public bool isClickable;
 		
 		public bool isRegistered = false;
 		
@@ -517,6 +520,19 @@ namespace VREO
 					VideoPlayer.Pause();
 				else if (VideoPlayer.isPrepared && (MovieQuad.ScreenPercentage > proximity))
 					VideoPlayer.Play();
+			}
+		}
+
+		void OnMouseUpAsButton()
+		{
+			if (!isClickable)
+				return;
+
+			print($"Ad spot with ID {spotId} was clicked.");
+
+			if (CurrentVreoResponse != null && CurrentVreoResponse.result != null && !string.IsNullOrEmpty(CurrentVreoResponse.result.str_MediaURL))
+			{
+				Application.OpenURL(CurrentVreoResponse.result.str_MediaURL);
 			}
 		}
 	} // VreoMoviePlayer.cs

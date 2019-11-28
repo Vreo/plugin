@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using UnityEditor;
+using UnityEditor.Experimental.SceneManagement;
 using UnityEngine;
 
 namespace VREO
@@ -16,7 +17,9 @@ namespace VREO
 		SerializedProperty _spotId;
 
 		SerializedProperty _proximity;
-		
+
+		SerializedProperty _isClickable;
+
 		SerializedProperty _isRegistered;
 		
 		void OnEnable()
@@ -28,9 +31,11 @@ namespace VREO
 			_imageDuration = serializedObject.FindProperty("imageDuration");
 			_spotId = serializedObject.FindProperty("spotId");
 			_proximity = serializedObject.FindProperty("proximity");
+			_isClickable = serializedObject.FindProperty("isClickable");
 			_isRegistered = serializedObject.FindProperty("isRegistered");
+			
 
-			if (!Application.isPlaying && !_isRegistered.boolValue)
+			if (!Application.isPlaying && !_isRegistered.boolValue && !IsPrefabMode())
 			{
 				var registerPopup = EditorWindow.GetWindow<VreoAdCanvasSettingsPopup>("Register Ad spot");
 				registerPopup.maxSize = new Vector2(400, 115);
@@ -54,20 +59,23 @@ namespace VREO
 		            adCanvas.OnMediaTypeChanged((VreoAdCanvas.MediaType)_mediaType.enumValueIndex);
 	            }
             }
-            
-            EditorGUILayout.PropertyField(_spotId);
-            
-            EditorGUI.BeginDisabledGroup(string.IsNullOrEmpty(_spotId.stringValue) || !_isRegistered.boolValue);
-            
-            if(GUILayout.Button("Unregister Ad Spot"))
+
+            if (!IsPrefabMode())
             {
-	            VreoCommunicate.RequestUnregisterAd(_spotId.stringValue, () =>
+	            EditorGUILayout.PropertyField(_spotId);
+            
+	            EditorGUI.BeginDisabledGroup(string.IsNullOrEmpty(_spotId.stringValue) || !_isRegistered.boolValue);
+            
+	            if(GUILayout.Button("Unregister Ad Spot"))
 	            {
-		            Debug.Log($"Ad spot with ID {_spotId.stringValue} was unregistered.");
-	            }, error =>
-	            {
-		            Debug.LogError($"An error occured while registering ad spot with ID {_spotId.stringValue}. Error: {error}");
-	            });
+		            VreoCommunicate.RequestUnregisterAd(_spotId.stringValue, () =>
+		            {
+			            Debug.Log($"Ad spot with ID {_spotId.stringValue} was unregistered.");
+		            }, error =>
+		            {
+			            Debug.LogError($"An error occured while registering ad spot with ID {_spotId.stringValue}. Error: {error}");
+		            });
+	            }
             }
             
             EditorGUI.EndDisabledGroup();
@@ -75,7 +83,7 @@ namespace VREO
             EditorGUILayout.Space();
             EditorGUILayout.PropertyField(_playOnAwake);
             EditorGUILayout.PropertyField(_autoPlayNew);
-
+            EditorGUILayout.PropertyField(_isClickable);
 
             switch ((VreoAdCanvas.MediaType)_mediaType.enumValueIndex)
             {
@@ -108,6 +116,21 @@ namespace VREO
 				return null;
 
 	        return adCanvasComp;
+        }
+
+        bool IsPrefabMode()
+        {
+	        var adCanvas = GetSelectedAdCanvas();
+	        if (adCanvas != null)
+	        {
+		        var prefabStage = PrefabStageUtility.GetPrefabStage(adCanvas.gameObject);
+		        if (prefabStage != null)
+		        {
+			        return true;
+		        }
+	        }
+
+	        return false;
         }
 	}
 }
