@@ -26,6 +26,7 @@ namespace VREO
 		public string str_DevAccessToken;
 		public int ID_Game;
 		public int ID_MediaType;
+		//public int ID_Category;
 		public string ID_Spot;
 		public string str_Device;
 		public string dat_Timestamp;
@@ -199,12 +200,12 @@ namespace VREO
         // RequestRandomAd
         // ==============================================================================
 
-        public static void RequestRandomAd(VreoAdCanvas.MediaType mediaType, string spotId, RandomAdRequestCallback callback)
+        public static void RequestRandomAd(VreoAdCanvas.MediaType mediaType, VreoAdCanvas.Category category, string spotId, RandomAdRequestCallback callback)
 		{
-			Instance.StartCoroutine(Instance.RequestAd(mediaType, spotId, callback));
+			Instance.StartCoroutine(Instance.RequestAd(mediaType, category, spotId, callback));
         }
 
-        IEnumerator RequestAd(VreoAdCanvas.MediaType mediaType, string spotId, RandomAdRequestCallback callback = null)
+        IEnumerator RequestAd(VreoAdCanvas.MediaType mediaType, VreoAdCanvas.Category category, string spotId, RandomAdRequestCallback callback = null)
 		{
             // request and wait for advertiser id
             RequestAdvertisingIdentifier();
@@ -217,6 +218,7 @@ namespace VREO
 				str_DevAccessToken = developerAccessToken,
 				ID_Game = developerGameId,
 				ID_MediaType = (int) mediaType,
+				//ID_Category = (int) category,
 				ID_Spot = spotId,
 				str_Device = DeviceId,
 				dat_Timestamp = GetTimestampString()

@@ -35,9 +35,42 @@ namespace VREO
 			PortraitVideo = 6
 		}
 
+		public enum Category
+		{
+			Unknown = 0,
+			AlcoholicBeverages = 1,
+			Automotive = 2,
+			BusinessAndIndustrialServices = 3,
+			ClothingAndAccessories = 4,
+			ComputingProductsAndConsumerElectronics = 5,
+			Construction = 6,
+			ConsultingAndLegal = 7,
+			EnergyOilGasUtilities = 8,
+			Entertainment = 9,
+			FinancialServices = 10,
+			Food = 11,
+			HomeAndGarden = 12,
+			Insurance = 13,
+			JobsAndEducation = 14,
+			MediaAndCommunications = 15,
+			Mining = 16,
+			NonProfitAndSocial = 17,
+			PharmaceuticalAndHealthcare = 18,
+			Political = 19,
+			RealEstate = 20,
+			Retail = 21,
+			SoftDrinks = 22,
+			SportAndFitness = 23,
+			TelecomAndInternet = 24,
+			Toys = 25,
+			TravelAndTourism = 26,
+			VideoGames = 27
+		}
+
 		// ==============================================================================
 
 		public MediaType mediaType = MediaType.LandscapeVideo;
+		public Category category = Category.Unknown;
 		public string developerGameSlotId = "0";
 
 		public bool playOnAwake = true;
@@ -196,7 +229,7 @@ namespace VREO
 			if (_loadingState == MediaLoadingState.Waiting || _loadingState == MediaLoadingState.Failed || force)
 			{
 				_loadingState = MediaLoadingState.Loading;
-				VreoCommunicate.RequestRandomAd(mediaType, spotId, RandomAdCallback);
+				VreoCommunicate.RequestRandomAd(mediaType, category, spotId, RandomAdCallback);
 			}
 		}
 

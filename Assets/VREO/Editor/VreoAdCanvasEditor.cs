@@ -10,6 +10,7 @@ namespace VREO
 	public class VreoAdCanvasEditor : Editor
 	{
 		SerializedProperty _mediaType;
+		SerializedProperty _category;
 		SerializedProperty _playOnAwake;
 		SerializedProperty _autoPlayNew;
 		SerializedProperty _initialRandomDelay;
@@ -25,6 +26,7 @@ namespace VREO
 		void OnEnable()
         {
 			_mediaType = serializedObject.FindProperty("mediaType");
+			_category = serializedObject.FindProperty("category");
 			_playOnAwake = serializedObject.FindProperty("playOnAwake");
 			_autoPlayNew = serializedObject.FindProperty("autoPlayNew");
 			_initialRandomDelay = serializedObject.FindProperty("initialRandomDelay");
@@ -51,6 +53,7 @@ namespace VREO
 
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(_mediaType);
+            EditorGUILayout.PropertyField(_category);
             if (EditorGUI.EndChangeCheck())
             {
 	            var adCanvas = GetSelectedAdCanvas();
