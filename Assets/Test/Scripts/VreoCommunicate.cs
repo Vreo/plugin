@@ -26,7 +26,7 @@ namespace VREO
 		public string str_DevAccessToken;
 		public int ID_Game;
 		public int ID_MediaType;
-		//public int ID_Category;
+		public int ID_Category;
 		public string ID_Spot;
 		public string str_Device;
 		public string dat_Timestamp;
@@ -218,7 +218,7 @@ namespace VREO
 				str_DevAccessToken = developerAccessToken,
 				ID_Game = developerGameId,
 				ID_MediaType = (int) mediaType,
-				//ID_Category = (int) category,
+				ID_Category = (int) category,
 				ID_Spot = spotId,
 				str_Device = DeviceId,
 				dat_Timestamp = GetTimestampString()
