@@ -53,11 +53,14 @@ namespace VREO
 		public float proximity = 3.0f;
 
 		public bool isClickable;
+		public bool enableHighlight;
 		
 		public bool isRegistered = false;
-		
+
 		// ==============================================================================
 
+		public GameObject highlight;
+		
 		bool _initialized;
 
 		MediaLoadingState _loadingState = MediaLoadingState.Waiting;
@@ -151,6 +154,12 @@ namespace VREO
 		{
 			if (!Application.isPlaying)
 				return;
+			
+			highlight = GetComponentInChildren<GlowObject>().gameObject;
+			if (!enableHighlight)
+			{
+				highlight.SetActive(false);
+			}
 			
 			if (!_initialized)
 			{
@@ -450,6 +459,15 @@ namespace VREO
 
 			MovieQuad.Update();
 
+			if (MovieQuad.BlockPercentage > 0.0f)
+			{
+				highlight.SetActive(false);
+			}
+			else
+			{
+				highlight.SetActive(enableHighlight);
+			}
+
 			// send view data intermittently
 			_sendViewDataTimer -= Time.deltaTime;
 			if (_sendViewDataTimer <= 0.0f)
@@ -457,9 +475,9 @@ namespace VREO
 				_sendViewDataTimer = SendViewDataTime;
 
 				var viewStat = MovieQuad.GetViewingData();
+
 				VreoCommunicate.__SendViewData(viewStat);
 			}
-
 
 			if (_loadingState == MediaLoadingState.Showing)
 			{
