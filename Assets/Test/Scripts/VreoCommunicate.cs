@@ -11,6 +11,7 @@ namespace VREO
 		public string ID_Spot;
 		public int ID_Game;
 		public int ID_GameDev;
+		public int clickable;
 	}
 
 	[Serializable]
@@ -79,6 +80,7 @@ namespace VREO
 	    public string dat_Timestamp;
 	    public string str_MediaTypeName;
 	    public string str_MediaURL;
+	    public string str_Link;
     }
 
 	// ==============================================================================
@@ -108,6 +110,7 @@ namespace VREO
 
 		const string RequestRegisterAdUrl = "https://vreo-api.herokuapp.com/spot";
 		const string RequestRandomAdUrl = "https://vreo-api.herokuapp.com/ad/request";
+		const string RequestRandomClickableAdUrl = "https://vreo-api.herokuapp.com/ad/clickable/request";
 		const string SendViewDataUrl = "https://vreo-api.herokuapp.com/ad/views";
 
 		static VreoCommunicate _instance;
@@ -200,12 +203,12 @@ namespace VREO
         // RequestRandomAd
         // ==============================================================================
 
-        public static void RequestRandomAd(VreoAdCanvas.MediaType mediaType, VreoAdCanvas.Category category, string spotId, RandomAdRequestCallback callback)
+        public static void RequestRandomAd(VreoAdCanvas.MediaType mediaType, VreoAdCanvas.Category category, string spotId, bool isClickable, RandomAdRequestCallback callback)
 		{
-			Instance.StartCoroutine(Instance.RequestAd(mediaType, category, spotId, callback));
+			Instance.StartCoroutine(Instance.RequestAd(mediaType, category, spotId, isClickable, callback));
         }
 
-        IEnumerator RequestAd(VreoAdCanvas.MediaType mediaType, VreoAdCanvas.Category category, string spotId, RandomAdRequestCallback callback = null)
+        IEnumerator RequestAd(VreoAdCanvas.MediaType mediaType, VreoAdCanvas.Category category, string spotId, bool isClickable, RandomAdRequestCallback callback = null)
 		{
             // request and wait for advertiser id
             RequestAdvertisingIdentifier();
@@ -234,7 +237,7 @@ namespace VREO
 
 			var pData = System.Text.Encoding.ASCII.GetBytes(jsonString.ToCharArray());
 
-			var request = CreateWebRequest(RequestRandomAdUrl, pData);
+			var request = CreateWebRequest(isClickable ? RequestRandomClickableAdUrl : RequestRandomAdUrl, pData);
 
 			// Wait until the response is returned
 			yield return request.SendWebRequest();

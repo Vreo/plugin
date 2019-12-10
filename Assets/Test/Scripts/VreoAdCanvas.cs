@@ -229,7 +229,7 @@ namespace VREO
 			if (_loadingState == MediaLoadingState.Waiting || _loadingState == MediaLoadingState.Failed || force)
 			{
 				_loadingState = MediaLoadingState.Loading;
-				VreoCommunicate.RequestRandomAd(mediaType, category, spotId, RandomAdCallback);
+				VreoCommunicate.RequestRandomAd(mediaType, category, spotId, isClickable, RandomAdCallback);
 			}
 		}
 
@@ -565,7 +565,7 @@ namespace VREO
 
 			if (CurrentVreoResponse != null && CurrentVreoResponse.result != null && !string.IsNullOrEmpty(CurrentVreoResponse.result.str_MediaURL))
 			{
-				Application.OpenURL(CurrentVreoResponse.result.str_MediaURL);
+				Application.OpenURL(CurrentVreoResponse.result.str_Link);
 			}
 		}
 	} // VreoMoviePlayer.cs
