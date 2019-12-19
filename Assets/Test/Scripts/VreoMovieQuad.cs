@@ -31,10 +31,20 @@ namespace VREO
 		Vector3[] _buf2 = new Vector3[16];
 		
 		private float _screenPercentage;
+		private float _currentBlockedAreaPercent;
+
 		public float ScreenPercentage
 		{
 			get { return _screenPercentage; }
 			private set { _screenPercentage = value; }
+		}
+
+		public float BlockPercentage
+		{
+			get 
+			{
+				return _currentBlockedAreaPercent; 
+			}
 		}
 
 		// ==============================================================================
@@ -100,7 +110,7 @@ namespace VREO
 		// ==============================================================================
 		public void Update()
 		{
-			var blockedAreaPercent = 0f;
+			_currentBlockedAreaPercent = 0f;
 			var area = 0f;
 			var percentualArea = 0f;
 			
@@ -167,9 +177,9 @@ namespace VREO
 #endif
 						}
 
-						blockedAreaPercent = 100.0f * blockedCount / _numOccluderQueries;
+						_currentBlockedAreaPercent = 100.0f * blockedCount / _numOccluderQueries;
 
-						var screenPercentage = area * (100.0f - blockedAreaPercent);
+						var screenPercentage = area * (100.0f - _currentBlockedAreaPercent);
 						screenPercentage /= _targetCamera.pixelRect.width * _targetCamera.pixelRect.height;
 
 						ScreenPercentage = screenPercentage;
@@ -187,13 +197,13 @@ namespace VREO
 						_avgTotalScreenPosition.y = y;
 
 						_avgBlockedAreaPercent =
-							(_avgBlockedAreaPercent * _systemViewTime + blockedAreaPercent * Time.deltaTime) /
+							(_avgBlockedAreaPercent * _systemViewTime + _currentBlockedAreaPercent * Time.deltaTime) /
 							(_systemViewTime + Time.deltaTime);
 						_systemViewTime += Time.deltaTime;
 					}
 				}
 
-				if (area > 0.0f && blockedAreaPercent < 100f)
+				if (area > 0.0f && _currentBlockedAreaPercent < 100f)
 				{
 					_totalHitTime += Time.deltaTime;
 				}

@@ -20,6 +20,7 @@ namespace VREO
 		SerializedProperty _proximity;
 
 		SerializedProperty _isClickable;
+		SerializedProperty _enableHighlight;
 
 		SerializedProperty _isRegistered;
 		
@@ -34,6 +35,7 @@ namespace VREO
 			_spotId = serializedObject.FindProperty("spotId");
 			_proximity = serializedObject.FindProperty("proximity");
 			_isClickable = serializedObject.FindProperty("isClickable");
+			_enableHighlight = serializedObject.FindProperty("enableHighlight");
 			_isRegistered = serializedObject.FindProperty("isRegistered");
 			
 
@@ -87,6 +89,10 @@ namespace VREO
             EditorGUILayout.PropertyField(_playOnAwake);
             EditorGUILayout.PropertyField(_autoPlayNew);
             EditorGUILayout.PropertyField(_isClickable);
+            
+            EditorGUI.BeginDisabledGroup(!_isClickable.boolValue);
+            EditorGUILayout.PropertyField(_enableHighlight);
+            EditorGUI.EndDisabledGroup();
 
             switch ((VreoAdCanvas.MediaType)_mediaType.enumValueIndex)
             {
